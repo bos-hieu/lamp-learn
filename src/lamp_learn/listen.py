@@ -8,10 +8,8 @@ Leave it running. It registers a few phrases with the lamp and waits:
   next lesson not started yet, in level order.
 - "beginner / intermediate / advanced English lesson": the same, from
   A1-A2, B1-B2 or C1-C2 only ("start my advanced English lesson" works too).
-- "next English lesson" (or "new English lesson"): the next lesson not
-  started yet, skipping reviews.
-- "repeat English lesson" (or "English lesson again"): the last lesson
-  practised, every item.
+- "next English lesson": the next lesson not started yet, skipping reviews.
+- "repeat English lesson": the last lesson practised, every item.
 - "list English lessons" (or "list beginner / intermediate / advanced
   lessons"): the lamp says the lessons at that level, then listens for one
   by name ("family lesson").
@@ -42,22 +40,29 @@ LEVEL_LESSON = {
     "advanced english lesson": ("C1", "C2"),
 }
 # The next new lesson, skipping reviews; the last lesson again, every item.
-NEXT_LESSON = ("next english lesson", "new english lesson")
-REPEAT_LESSON = ("repeat english lesson", "english lesson again")
+# (The lamp listens for 16 phrases at most, so each has one form.)
+NEXT_LESSON = ("next english lesson",)
+REPEAT_LESSON = ("repeat english lesson",)
 FREE_TALK = ("english free talk",)
 # The lamp says a level's lessons, then listens for one of them by name.
+# Both "lessons" and "lesson": the recognizer writes either, and a missed
+# list phrase would leave only "english lesson", which starts a lesson.
 LIST_LESSONS = {
     "list english lessons": None,  # the learner's own level
+    "list english lesson": None,
     "list beginner lessons": ("A1", "A2"),
+    "list beginner lesson": ("A1", "A2"),
     "list intermediate lessons": ("B1", "B2"),
+    "list intermediate lesson": ("B1", "B2"),
     "list advanced lessons": ("C1", "C2"),
+    "list advanced lesson": ("C1", "C2"),
 }
 WAKE = START_LESSON + tuple(LEVEL_LESSON) + NEXT_LESSON + REPEAT_LESSON + FREE_TALK + tuple(LIST_LESSONS)
 
 GROUPS = (("beginner", ("A1", "A2")), ("intermediate", ("B1", "B2")), ("advanced", ("C1", "C2")))
 
 # How long the lamp waits for a lesson's name after listing them.
-CHOOSE_S = 20.0
+CHOOSE_S = 30.0
 
 # A lesson's spoken name: said back as "<name> lesson" to choose it.
 SPOKEN = {"numbers-time": "numbers", "jobinterview": "job interview", "daily": "daily routine"}
@@ -122,13 +127,29 @@ def menu(progress: Progress, phrase: str, levels: tuple[str, ...] | None = None)
     found.sort(key=lambda l: (LEVEL_ORDER.get(l.level, 9), l.id))
     found = found[:15]
     choices = {f"{spoken_name(l)} lesson": l for l in found}
-    names = ", ".join(spoken_name(l) for l in found)
-    example = spoken_name(found[0]) if found else "family"
-    line = (
-        f"{name.capitalize()} lessons: {names}. Say one with the word lesson, like {example} lesson. "
-        "For another level, say " + " or ".join(f"list {n} lessons" for n, g in GROUPS if g != group) + "."
+    example = spoken_name(found[1] if len(found) > 1 else found[0]) if found else "family"
+    parts = (
+        [f"{name.capitalize()} lessons:"]
+        + [f"{spoken_name(l)}." for l in found]
+        + [
+            f"Which one? Say its name and the word lesson, like {example} lesson.",
+            "For another level, say " + " or ".join(f"list {n} lessons" for n, g in GROUPS if g != group) + ".",
+        ]
     )
-    return line, choices
+    return " ".join(parts), choices
+
+
+def _sentences(line: str) -> list[str]:
+    """The list's heading, each name, then each sentence: what `menu` joined."""
+    head, _, rest = line.partition(": ")
+    if not rest:
+        return [line]
+    out = [head + ":"]
+    for word in rest.split(". "):
+        word = word.strip()
+        if word:
+            out.append(word if word.endswith(".") else word + ".")
+    return out
 
 
 async def choose_from_menu(lamp, line: str, choices: dict[str, lessons.Lesson], wait_s: float | None = None) -> lessons.Lesson | None:
@@ -142,7 +163,11 @@ async def choose_from_menu(lamp, line: str, choices: dict[str, lessons.Lesson], 
             picked.set_result(choices[phrase])
 
     await lamp.on("phrase.heard", on_phrase, phrases=list(choices))
-    await lamp.say(line, wait=True)
+    # One sentence at a time, so the names come with a pause between them.
+    for part in _sentences(line):
+        if picked.done():
+            break
+        await lamp.say(part, wait=True)
     try:
         return await asyncio.wait_for(picked, wait_s if wait_s is not None else CHOOSE_S)
     except asyncio.TimeoutError:
@@ -225,10 +250,12 @@ async def serve(
     talk_level: str = "B1",
     log: Callable[[str], None] = print,
     once: bool = False,
+    show: Callable[[str, str], None] | None = None,
 ) -> None:
     """Wait for a wake phrase, run what it asks, and wait again. `connect` is
     a coroutine function giving a connected lamp (an async context manager).
-    With `once`, returns after the first lesson or talk."""
+    With `once`, returns after the first lesson or talk. `show(title, text)`
+    puts the lesson list on this computer's screen too (a notification)."""
     progress = progress or Progress()
     backoff = 1.0
     installed = False
@@ -250,10 +277,13 @@ async def serve(
             await asyncio.sleep(START_PAUSE_S)
             if phrase in LIST_LESSONS:
                 line, choices = menu(progress, phrase, levels)
+                log(f"list: {line}")
+                if show:
+                    show("English lessons", line)
                 async with await _connect(connect) as lamp:
                     found = await choose_from_menu(lamp, line, choices)
                     if found is None:
-                        await lamp.say("Okay, maybe later.", wait=True)
+                        await lamp.say("I didn't catch a lesson. Say list English lessons to hear them again.", wait=True)
                 if found is None:
                     log("list: nothing chosen")
                     if once:

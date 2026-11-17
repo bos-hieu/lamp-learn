@@ -131,6 +131,21 @@ async def _talk(args) -> int:
     return 0
 
 
+def _notify(title: str, text: str) -> None:
+    """A macOS notification; nothing elsewhere."""
+    import shutil
+    import subprocess
+
+    if sys.platform != "darwin" or not shutil.which("osascript"):
+        return
+    quote = lambda t: t.replace("\\", "\\\\").replace('"', '\\"')
+    subprocess.run(
+        ["osascript", "-e", f'display notification "{quote(text)}" with title "{quote(title)}"'],
+        check=False,
+        capture_output=True,
+    )
+
+
 async def _listen(args) -> int:
     from lampos import Lamp
 
@@ -144,6 +159,7 @@ async def _listen(args) -> int:
         listen_s=args.listen,
         talk_level=args.talk_level,
         log=_print,
+        show=None if args.no_notify else _notify,
     )
     return 0
 
@@ -237,6 +253,7 @@ def main(argv: list[str] | None = None) -> int:
     listen.add_argument("--listen", type=float, default=15, help="seconds to wait for each answer (default 15)")
     listen.add_argument("--talk-level", default="B1", help='the level for "English free talk" (default B1)')
     listen.add_argument("--learner", default="default")
+    listen.add_argument("--no-notify", action="store_true", help="don't show the lesson list as a notification (macOS)")
     listen.add_argument("--lamp")
     listen.add_argument("--host")
     listen.set_defaults(run=_listen)

@@ -431,7 +431,7 @@ def test_next_and_repeat_choose_the_right_lesson(tmp_path):
         if item.kind != "talk":
             progress.record(found.id, item.id, True, now=1000.0)
     # Repeat gives the last lesson, every item; next skips it.
-    again, due_only, note = choose("english lesson again", progress)
+    again, due_only, note = choose("repeat english lesson", progress)
     assert again.id == found.id and not due_only and not note
     after, due_only, _ = choose("next english lesson", progress)
     assert after.id != found.id and not due_only
@@ -510,4 +510,28 @@ async def test_list_lessons_then_choose_one_by_name(tmp_path):
         found = await asyncio.wait_for(task, 5)
         assert found.id == "en-a1-family"
         assert await choose_from_menu(lamp, line, choices, wait_s=0.2) is None
+        await lamp.close()
+
+
+async def test_stop_while_a_word_is_taught_ends_before_the_next_line(tmp_path):
+    lesson = tiny()
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=2.0, tries=1, language="en")
+        said = []
+        real_say = session.say
+
+        async def say(text, **kw):
+            said.append(text)
+            if text.startswith("New words"):
+                session._on_phrase({"phrase": "stop english lesson"})
+            return await real_say(text, **kw)
+
+        session.say = say
+        item = next(i for i in lesson.items if i.kind == "word")
+        from lamp_learn.coach import _Stopped
+
+        with pytest.raises(_Stopped):
+            await session.teach(item)
+        assert said[-1].startswith("New words")  # no meaning, no example after the stop
         await lamp.close()

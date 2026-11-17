@@ -252,7 +252,10 @@ class Session:
             text = random.choice(text)
         return text.format(**fields)
 
-    async def say(self, text: str) -> dict:
+    async def say(self, text: str, *, even_stopped: bool = False) -> dict:
+        # A stop heard while the lamp spoke ends the lesson before its next line.
+        if self._stopped and not even_stopped:
+            raise _Stopped
         self.log(f"say: {text}")
         return await self.lamp.say(text, wait=True)
 
@@ -388,7 +391,10 @@ class Session:
         result = LessonResult(self.lesson.id)
         self._marks, self._total = [], len(items)
         await self._show_progress(0)
-        await self.say(self.lesson.intro or self._word("start", title=self.lesson.title))
+        try:
+            await self.say(self.lesson.intro or self._word("start", title=self.lesson.title))
+        except _Stopped:
+            pass
         for n, item in enumerate(items):
             if self._stopped:
                 break
@@ -402,7 +408,7 @@ class Session:
         if self._stopped:
             # The item it stopped on isn't scored; the ones done are kept.
             result.stopped = True
-            await self.say(self._word("stopped"))
+            await self.say(self._word("stopped"), even_stopped=True)
             return result
         await self._show_progress()
         if result.scored:

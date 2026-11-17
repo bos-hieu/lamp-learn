@@ -85,9 +85,9 @@ python3 -m venv .venv
    |---|---|
    | "start my English lesson" | reviews due first, else the next new lesson |
    | "beginner / intermediate / advanced English lesson" | the same, from A1-A2, B1-B2 or C1-C2 |
-   | "next English lesson" / "new English lesson" | the next lesson not started yet, skipping reviews |
-   | "repeat English lesson" / "English lesson again" | the last lesson practised, every item |
-   | "list English lessons" / "list beginner (intermediate, advanced) lessons" | the lamp says that level's lessons; then say one, like "family lesson" |
+   | "next English lesson" | the next lesson not started yet, skipping reviews |
+   | "repeat English lesson" | the last lesson practised, every item |
+   | "list English lessons" / "list beginner (intermediate, advanced) lessons" | the lamp says that level's lessons; then say one within 30 s, like "family lesson" (on a Mac the list also shows as a notification) |
    | "English free talk" | a conversation with the lamp's own AI |
 
    **Stop a lesson:** stroke the lamp's head, or say "stop English lesson". What
