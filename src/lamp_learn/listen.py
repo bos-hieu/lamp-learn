@@ -13,6 +13,8 @@ Leave it running. It registers a few phrases with the lamp and waits:
 - "list English lessons" (or "list beginner / intermediate / advanced
   lessons"): the lamp says the lessons at that level, then listens for one
   by name ("family lesson").
+- With `--levels`, a lesson by name too: "start family lesson" (as many as
+  fit in the lamp's 16 phrases, in level order).
 - "English free talk": a conversation with the lamp's own model (free talk).
 
 It hears these through the lamp's own phrase matching, as a lesson's answers
@@ -208,22 +210,43 @@ async def _connect(connect, tries: int = 6):
             await asyncio.sleep(0.5 * (n + 1))
 
 
-async def wait_for_wake(lamp) -> str:
+def wake_phrases(levels: tuple[str, ...] | None = None) -> tuple[list[str], dict[str, lessons.Lesson]]:
+    """The phrases to wait for, and the lessons started by name. With
+    `levels`, the phrases for other levels make room for lessons said by
+    name ("start family lesson"), up to the lamp's 16."""
+    if not levels:
+        return list(WAKE), {}
+    keep = [
+        p
+        for p in WAKE
+        if not ((p in LEVEL_LESSON and not set(LEVEL_LESSON[p]) & set(levels)) or (p in LIST_LESSONS and LIST_LESSONS[p] and not set(LIST_LESSONS[p]) & set(levels)))
+    ]
+    found = sorted((l for l in lessons.builtin().values() if l.level in levels), key=lambda l: (LEVEL_ORDER.get(l.level, 9), l.id))
+    direct = {}
+    for l in found:
+        if len(keep) + len(direct) >= 16:
+            break
+        direct[f"{spoken_name(l)} lesson"] = l
+    return keep + list(direct), direct
+
+
+async def wait_for_wake(lamp, phrases: list[str] | None = None) -> str:
     """Register the wake phrases and return the one heard. A line can hold
     two ("start my advanced English lesson" holds "English lesson" too):
     after the first, a moment more is given, and the more specific one wins."""
+    wanted = list(phrases or WAKE)
     loop = asyncio.get_running_loop()
     first: asyncio.Future = loop.create_future()
     got: list[str] = []
 
     def on_phrase(event: dict) -> None:
         phrase = str(event.get("phrase", "")).lower()
-        if phrase in WAKE:
+        if phrase in wanted:
             got.append(phrase)
             if not first.done():
                 first.set_result(phrase)
 
-    await lamp.on("phrase.heard", on_phrase, phrases=list(WAKE))
+    await lamp.on("phrase.heard", on_phrase, phrases=wanted)
     # A connection that drops (the lamp restarts, a relay or the network goes)
     # ends the wait, so the caller connects again instead of waiting forever.
     closed = asyncio.ensure_future(lamp.wait_closed())
@@ -271,10 +294,21 @@ async def serve(
                     await install(lamp, log)
                     installed = True
                 log('listening: say "start my English lesson", "next English lesson", "repeat English lesson", "list English lessons", a beginner, intermediate or advanced English lesson, or "English free talk" to the lamp')
-                phrase = await wait_for_wake(lamp)
+                phrases, direct = wake_phrases(levels)
+                phrase = await wait_for_wake(lamp, phrases)
             log(f"heard: {phrase}")
             # Let the lamp's own short "starting" line be said first.
             await asyncio.sleep(START_PAUSE_S)
+            if phrase in direct:
+                found = direct[phrase]
+                log(f"lesson: {found.id} (said by name)")
+                async with await _connect(connect) as lamp:
+                    session = await Session.open(lamp, found, progress=progress, language=language, listen_s=listen_s, log=log)
+                    result = await session.run()
+                    log(f"lesson done: {result.right} of {result.scored} right{' (stopped)' if result.stopped else ''}")
+                if once:
+                    return
+                continue
             if phrase in LIST_LESSONS:
                 line, choices = menu(progress, phrase, levels)
                 log(f"list: {line}")

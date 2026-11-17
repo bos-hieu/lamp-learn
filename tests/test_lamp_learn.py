@@ -535,3 +535,13 @@ async def test_stop_while_a_word_is_taught_ends_before_the_next_line(tmp_path):
             await session.teach(item)
         assert said[-1].startswith("New words")  # no meaning, no example after the stop
         await lamp.close()
+
+
+def test_limited_levels_make_room_for_lessons_by_name():
+    from lamp_learn.listen import wake_phrases
+
+    phrases, direct = wake_phrases(("A1", "A2"))
+    assert len(phrases) <= 16 and "family lesson" in direct and "family lesson" in phrases
+    assert "list advanced lessons" not in phrases and "list english lessons" in phrases
+    assert direct["family lesson"].id == "en-a1-family"
+    assert wake_phrases(None)[1] == {}
