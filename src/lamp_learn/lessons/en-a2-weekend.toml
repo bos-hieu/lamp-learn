@@ -1,0 +1,47 @@
+id = "en-a2-weekend"
+title = "Last weekend"
+target = "en"
+level = "A2"
+intro = "Let's practise talking about the past: what you did last weekend."
+
+[[items]]
+id = "went-to"
+kind = "repeat"
+phrase = "i went to the beach"
+accept = ["went to the beach"]
+hint = { vi = "tôi đã đi biển" }
+
+[[items]]
+id = "watched"
+kind = "repeat"
+phrase = "we watched a film on saturday"
+accept = ["watched a film", "watched a movie on saturday"]
+hint = { vi = "chúng tôi xem phim vào thứ bảy" }
+
+[[items]]
+id = "visited"
+kind = "repeat"
+phrase = "i visited my grandmother"
+accept = ["visited my grandmother", "visited my grandma"]
+hint = { vi = "tôi đã đến thăm bà" }
+
+[[items]]
+id = "had-a-great-time"
+kind = "word"
+phrase = "i had a great time"
+accept = ["had a great time"]
+meaning = "you enjoyed something very much"
+example = "I had a great time at the party."
+hint = { vi = "tôi đã rất vui" }
+
+[[items]]
+id = "what-did-you-do"
+kind = "repeat"
+phrase = "what did you do last weekend"
+accept = ["what did you do"]
+hint = { vi = "cuối tuần trước bạn đã làm gì" }
+
+[[items]]
+id = "talk-weekend"
+kind = "talk"
+prompt = "What did you do last weekend? Tell me two things."

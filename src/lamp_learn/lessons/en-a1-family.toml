@@ -1,0 +1,48 @@
+id = "en-a1-family"
+title = "My family"
+target = "en"
+level = "A1"
+intro = "Let's talk about your family."
+
+[[items]]
+id = "this-is-mother"
+kind = "repeat"
+phrase = "this is my mother"
+hint = { vi = "đây là mẹ tôi" }
+
+[[items]]
+id = "brother"
+kind = "word"
+phrase = "my little brother"
+accept = ["little brother"]
+meaning = "a brother who is younger than you"
+example = "My little brother is eight years old."
+hint = { vi = "em trai tôi" }
+
+[[items]]
+id = "how-many"
+kind = "repeat"
+phrase = "i have two sisters"
+accept = ["i have 2 sisters", "two sisters"]
+hint = { vi = "tôi có hai chị em gái" }
+
+[[items]]
+id = "father-works"
+kind = "repeat"
+phrase = "my father is a teacher"
+accept = ["father is a teacher"]
+hint = { vi = "bố tôi là giáo viên" }
+
+[[items]]
+id = "grandparents"
+kind = "word"
+phrase = "my grandparents"
+accept = ["grandparents"]
+meaning = "the parents of your mother or father"
+example = "I visit my grandparents every Sunday."
+hint = { vi = "ông bà của tôi" }
+
+[[items]]
+id = "talk-family"
+kind = "talk"
+prompt = "Tell me about your family. How many people are in your family?"

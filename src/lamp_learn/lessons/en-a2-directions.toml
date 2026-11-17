@@ -1,0 +1,48 @@
+id = "en-a2-directions"
+title = "Asking for directions"
+target = "en"
+level = "A2"
+intro = "Let's practise asking the way in a new city."
+
+[[items]]
+id = "excuse-me"
+kind = "repeat"
+phrase = "excuse me where is the station"
+accept = ["where is the station", "where is the train station"]
+hint = { vi = "xin lỗi, nhà ga ở đâu" }
+
+[[items]]
+id = "turn-left"
+kind = "repeat"
+phrase = "turn left at the traffic lights"
+accept = ["left at the traffic lights"]
+hint = { vi = "rẽ trái ở chỗ đèn giao thông" }
+
+[[items]]
+id = "go-straight"
+kind = "word"
+phrase = "go straight on"
+accept = ["go straight ahead", "straight on"]
+meaning = "keep walking in the same direction"
+example = "Go straight on for two hundred metres."
+hint = { vi = "đi thẳng" }
+
+[[items]]
+id = "next-to"
+kind = "word"
+phrase = "next to the bank"
+meaning = "beside, very close to"
+example = "The pharmacy is next to the bank."
+hint = { vi = "bên cạnh ngân hàng" }
+
+[[items]]
+id = "how-far"
+kind = "repeat"
+phrase = "is it far from here"
+accept = ["far from here"]
+hint = { vi = "có xa đây không" }
+
+[[items]]
+id = "talk-directions"
+kind = "talk"
+prompt = "Tell me how to get from your home to the nearest shop."

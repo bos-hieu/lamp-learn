@@ -1,0 +1,51 @@
+id = "en-c2-idioms"
+title = "Idioms and nuance"
+target = "en"
+level = "C2"
+intro = "Let's practise idioms a native speaker uses without thinking."
+
+[[items]]
+id = "tip-of-tongue"
+kind = "word"
+phrase = "on the tip of my tongue"
+accept = ["tip of my tongue"]
+meaning = "you almost remember a word but cannot quite say it"
+example = "Her name is on the tip of my tongue, but I just cannot recall it."
+hint = { vi = "nhớ mà không nói ra được" }
+
+[[items]]
+id = "beat-around-bush"
+kind = "word"
+phrase = "stop beating around the bush"
+accept = ["beating around the bush", "beat around the bush"]
+meaning = "stop avoiding the main point and say it directly"
+example = "Stop beating around the bush and tell me what really happened."
+hint = { vi = "đừng vòng vo nữa" }
+
+[[items]]
+id = "grain-of-salt"
+kind = "word"
+phrase = "take it with a grain of salt"
+accept = ["with a grain of salt", "with a pinch of salt"]
+meaning = "do not believe it completely"
+example = "He exaggerates, so take his stories with a grain of salt."
+hint = { vi = "đừng tin hoàn toàn" }
+
+[[items]]
+id = "blessing-disguise"
+kind = "repeat"
+phrase = "it was a blessing in disguise"
+accept = ["a blessing in disguise"]
+hint = { vi = "trong cái rủi có cái may" }
+
+[[items]]
+id = "cut-corners"
+kind = "repeat"
+phrase = "we cannot afford to cut corners"
+accept = ["we cant afford to cut corners", "afford to cut corners"]
+hint = { vi = "chúng ta không thể làm ẩu" }
+
+[[items]]
+id = "talk-idiom"
+kind = "talk"
+prompt = "Tell me about a setback in your life that turned out to be a blessing in disguise. Use at least one idiom."

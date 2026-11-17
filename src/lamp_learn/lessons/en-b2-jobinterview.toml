@@ -1,0 +1,49 @@
+id = "en-b2-jobinterview"
+title = "Job interview"
+target = "en"
+level = "B2"
+intro = "Let's prepare for a job interview in English."
+
+[[items]]
+id = "tell-about"
+kind = "repeat"
+phrase = "i have five years of experience in sales"
+accept = ["five years of experience", "years of experience in sales"]
+hint = { vi = "tôi có năm năm kinh nghiệm trong ngành bán hàng" }
+
+[[items]]
+id = "strength"
+kind = "repeat"
+phrase = "my greatest strength is problem solving"
+accept = ["my greatest strength is", "greatest strength"]
+hint = { vi = "điểm mạnh lớn nhất của tôi là giải quyết vấn đề" }
+
+[[items]]
+id = "team-player"
+kind = "word"
+phrase = "a team player"
+accept = ["team player"]
+meaning = "someone who works well with other people"
+example = "I am a team player, but I can also work on my own."
+hint = { vi = "người có tinh thần đồng đội" }
+
+[[items]]
+id = "looking-forward"
+kind = "repeat"
+phrase = "i am looking forward to hearing from you"
+accept = ["looking forward to hearing from you"]
+hint = { vi = "tôi mong nhận được phản hồi từ quý công ty" }
+
+[[items]]
+id = "challenge"
+kind = "word"
+phrase = "a challenging situation"
+accept = ["challenging situation"]
+meaning = "a difficult situation that tests your skills"
+example = "Tell me about a challenging situation you handled at work."
+hint = { vi = "một tình huống khó khăn" }
+
+[[items]]
+id = "talk-interview"
+kind = "talk"
+prompt = "Why should we hire you? Give me two strengths and an example for each."

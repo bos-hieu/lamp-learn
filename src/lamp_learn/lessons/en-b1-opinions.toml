@@ -1,0 +1,47 @@
+id = "en-b1-opinions"
+title = "Giving opinions"
+target = "en"
+level = "B1"
+intro = "Let's practise saying what you think, agreeing and disagreeing politely."
+
+[[items]]
+id = "in-my-opinion"
+kind = "repeat"
+phrase = "in my opinion"
+hint = { vi = "theo ý kiến của tôi" }
+
+[[items]]
+id = "agree"
+kind = "repeat"
+phrase = "i completely agree with you"
+accept = ["i agree with you", "completely agree"]
+hint = { vi = "tôi hoàn toàn đồng ý với bạn" }
+
+[[items]]
+id = "not-sure"
+kind = "repeat"
+phrase = "i am not sure about that"
+accept = ["not sure about that"]
+hint = { vi = "tôi không chắc lắm về điều đó" }
+
+[[items]]
+id = "on-the-other-hand"
+kind = "word"
+phrase = "on the other hand"
+meaning = "used to give a different side of an idea"
+example = "The city is exciting. On the other hand, it is very expensive."
+hint = { vi = "mặt khác" }
+
+[[items]]
+id = "advantage"
+kind = "word"
+phrase = "the main advantage"
+accept = ["main advantage"]
+meaning = "the most important good point"
+example = "The main advantage of working from home is no traffic."
+hint = { vi = "ưu điểm chính" }
+
+[[items]]
+id = "talk-city"
+kind = "talk"
+prompt = "Is it better to live in a big city or in the countryside? Give me your opinion and one reason."

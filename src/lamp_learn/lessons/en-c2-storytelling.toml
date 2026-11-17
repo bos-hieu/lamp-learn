@@ -1,0 +1,42 @@
+id = "en-c2-storytelling"
+title = "Storytelling and vivid language"
+target = "en"
+level = "C2"
+intro = "Let's practise telling a story so that people can see it."
+
+[[items]]
+id = "little-did"
+kind = "repeat"
+phrase = "little did i know what was about to happen"
+accept = ["little did i know"]
+hint = { vi = "tôi đâu ngờ chuyện sắp xảy ra" }
+
+[[items]]
+id = "no-sooner"
+kind = "repeat"
+phrase = "no sooner had we arrived than it started to rain"
+accept = ["no sooner had we arrived"]
+hint = { vi = "chúng tôi vừa đến thì trời đổ mưa" }
+
+[[items]]
+id = "eerie"
+kind = "word"
+phrase = "an eerie silence"
+accept = ["eerie silence"]
+meaning = "a strange and slightly frightening quiet"
+example = "When the music stopped, an eerie silence filled the hall."
+hint = { vi = "sự im lặng rợn người" }
+
+[[items]]
+id = "serendipity"
+kind = "word"
+phrase = "pure serendipity"
+accept = ["serendipity"]
+meaning = "finding something good by chance"
+example = "Meeting my business partner on that train was pure serendipity."
+hint = { vi = "sự tình cờ may mắn" }
+
+[[items]]
+id = "talk-story"
+kind = "talk"
+prompt = "Tell me a short story about an unexpected meeting, using inversion such as little did I know or no sooner had I."

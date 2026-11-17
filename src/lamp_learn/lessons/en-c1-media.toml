@@ -1,0 +1,49 @@
+id = "en-c1-media"
+title = "News and the media"
+target = "en"
+level = "C1"
+intro = "Let's discuss the news, bias and how to read critically."
+
+[[items]]
+id = "clickbait"
+kind = "word"
+phrase = "clickbait headlines"
+accept = ["clickbait"]
+meaning = "headlines written to make you click, often misleading"
+example = "Clickbait headlines promise shocks that the article never delivers."
+hint = { vi = "tiêu đề câu view" }
+
+[[items]]
+id = "biased"
+kind = "repeat"
+phrase = "the coverage was heavily biased"
+accept = ["heavily biased", "coverage was biased"]
+hint = { vi = "việc đưa tin rất thiên lệch" }
+
+[[items]]
+id = "reliable-source"
+kind = "repeat"
+phrase = "always check a reliable source"
+accept = ["check a reliable source", "a reliable source"]
+hint = { vi = "luôn kiểm tra nguồn đáng tin cậy" }
+
+[[items]]
+id = "taken-out"
+kind = "word"
+phrase = "taken out of context"
+accept = ["out of context"]
+meaning = "used without the surrounding words, so the meaning changes"
+example = "The quote was taken out of context to make him look bad."
+hint = { vi = "bị trích dẫn sai ngữ cảnh" }
+
+[[items]]
+id = "allegedly"
+kind = "repeat"
+phrase = "the minister allegedly accepted bribes"
+accept = ["allegedly accepted bribes"]
+hint = { vi = "vị bộ trưởng bị cáo buộc nhận hối lộ" }
+
+[[items]]
+id = "talk-news"
+kind = "talk"
+prompt = "How do you decide whether a news story is true? Describe the steps you take."

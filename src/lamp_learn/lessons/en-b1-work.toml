@@ -1,0 +1,55 @@
+id = "en-b1-work"
+title = "At work: meetings and email"
+target = "en"
+level = "B1"
+intro = "Let's practise English for meetings at work."
+
+[[items]]
+id = "agenda"
+kind = "repeat"
+phrase = "let us look at the agenda"
+accept = ["lets look at the agenda", "look at the agenda"]
+hint = { vi = "chúng ta cùng xem chương trình họp" }
+
+[[items]]
+id = "point"
+kind = "repeat"
+phrase = "i see your point but"
+accept = ["i see your point"]
+hint = { vi = "tôi hiểu ý bạn, nhưng" }
+
+[[items]]
+id = "deadline"
+kind = "word"
+phrase = "the deadline"
+accept = ["deadline"]
+meaning = "the latest time by which something must be finished"
+example = "The deadline for the report is Friday afternoon."
+hint = { vi = "hạn chót" }
+
+[[items]]
+id = "follow-up"
+kind = "repeat"
+phrase = "i will follow up by email"
+accept = ["follow up by email"]
+hint = { vi = "tôi sẽ gửi email trao đổi tiếp" }
+
+[[items]]
+id = "repeat-that"
+kind = "repeat"
+phrase = "could you repeat that please"
+accept = ["could you repeat that"]
+hint = { vi = "bạn nhắc lại được không" }
+
+[[items]]
+id = "behind-schedule"
+kind = "word"
+phrase = "behind schedule"
+meaning = "later than planned"
+example = "The project is two weeks behind schedule."
+hint = { vi = "chậm tiến độ" }
+
+[[items]]
+id = "talk-job"
+kind = "talk"
+prompt = "Describe your job to me. What do you do on a normal working day, and what do you like about it?"

@@ -1,0 +1,47 @@
+id = "en-b2-environment"
+title = "The environment"
+target = "en"
+level = "B2"
+intro = "Let's talk about the environment and what we can do."
+
+[[items]]
+id = "carbon-footprint"
+kind = "word"
+phrase = "carbon footprint"
+meaning = "the amount of carbon dioxide your activities produce"
+example = "Taking the train instead of flying reduces your carbon footprint."
+hint = { vi = "lượng khí thải carbon" }
+
+[[items]]
+id = "renewable"
+kind = "word"
+phrase = "renewable energy"
+meaning = "energy from sources that do not run out, like sun and wind"
+example = "The country wants half its power from renewable energy by 2035."
+hint = { vi = "năng lượng tái tạo" }
+
+[[items]]
+id = "should-be-banned"
+kind = "repeat"
+phrase = "single use plastic should be banned"
+accept = ["plastic should be banned"]
+hint = { vi = "nhựa dùng một lần nên bị cấm" }
+
+[[items]]
+id = "if-everyone"
+kind = "repeat"
+phrase = "if everyone recycled we would produce less waste"
+accept = ["if everyone recycled", "produce less waste"]
+hint = { vi = "nếu mọi người đều tái chế, chúng ta sẽ ít rác hơn" }
+
+[[items]]
+id = "its-high-time"
+kind = "repeat"
+phrase = "it is high time we took action"
+accept = ["its high time we took action", "high time we took action"]
+hint = { vi = "đã đến lúc chúng ta phải hành động" }
+
+[[items]]
+id = "talk-environment"
+kind = "talk"
+prompt = "What are three things you could change in your daily life to help the environment? Which is the easiest?"

@@ -1,0 +1,48 @@
+id = "en-b1-health"
+title = "At the doctor"
+target = "en"
+level = "B1"
+intro = "Let's practise talking to a doctor about how you feel."
+
+[[items]]
+id = "appointment"
+kind = "repeat"
+phrase = "i would like to make an appointment"
+accept = ["make an appointment"]
+hint = { vi = "tôi muốn đặt lịch khám" }
+
+[[items]]
+id = "headache"
+kind = "repeat"
+phrase = "i have had a headache since yesterday"
+accept = ["a headache since yesterday", "headache since yesterday"]
+hint = { vi = "tôi bị đau đầu từ hôm qua" }
+
+[[items]]
+id = "allergic"
+kind = "word"
+phrase = "allergic to"
+meaning = "your body reacts badly to something"
+example = "I am allergic to peanuts."
+hint = { vi = "bị dị ứng với" }
+
+[[items]]
+id = "prescription"
+kind = "word"
+phrase = "a prescription"
+accept = ["prescription"]
+meaning = "a note from a doctor so you can get medicine"
+example = "The doctor gave me a prescription for my cough."
+hint = { vi = "đơn thuốc" }
+
+[[items]]
+id = "how-often"
+kind = "repeat"
+phrase = "how often should i take it"
+accept = ["how often should i take"]
+hint = { vi = "tôi nên uống bao lâu một lần" }
+
+[[items]]
+id = "talk-healthy"
+kind = "talk"
+prompt = "What do you do to stay healthy? Tell me about your food, sleep and exercise."

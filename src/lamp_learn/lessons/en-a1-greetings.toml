@@ -1,0 +1,42 @@
+id = "en-a1-greetings"
+title = "Greetings"
+target = "en"
+level = "A1"
+intro = "Let's practise saying hello in English."
+
+[[items]]
+id = "good-morning"
+kind = "repeat"
+phrase = "good morning"
+hint = { vi = "chào buổi sáng" }
+
+[[items]]
+id = "how-are-you"
+kind = "repeat"
+phrase = "how are you today"
+accept = ["how are you"]
+hint = { vi = "hôm nay bạn thế nào" }
+
+[[items]]
+id = "fine-thanks"
+kind = "repeat"
+phrase = "i am fine thank you"
+accept = ["im fine thank you", "fine thank you"]
+hint = { vi = "tôi khỏe, cảm ơn" }
+
+[[items]]
+id = "nice-to-meet"
+kind = "repeat"
+phrase = "nice to meet you"
+hint = { vi = "rất vui được gặp bạn" }
+
+[[items]]
+id = "see-you"
+kind = "repeat"
+phrase = "see you tomorrow"
+hint = { vi = "hẹn gặp lại ngày mai" }
+
+[[items]]
+id = "talk-intro"
+kind = "talk"
+prompt = "Hi! Tell me your name and how you are today, in English."

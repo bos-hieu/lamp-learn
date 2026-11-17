@@ -1,0 +1,49 @@
+id = "en-b2-relationships"
+title = "Friends and relationships"
+target = "en"
+level = "B2"
+intro = "Let's talk about friends, family and getting along."
+
+[[items]]
+id = "get-on"
+kind = "repeat"
+phrase = "i get on really well with my sister"
+accept = ["get on really well with", "get on well with my sister"]
+hint = { vi = "tôi rất hợp với chị gái" }
+
+[[items]]
+id = "fell-out"
+kind = "word"
+phrase = "we fell out"
+accept = ["fell out with"]
+meaning = "you stopped being friends after an argument"
+example = "We fell out over money, but we are friends again now."
+hint = { vi = "chúng tôi đã cãi nhau, giận nhau" }
+
+[[items]]
+id = "count-on"
+kind = "repeat"
+phrase = "i can always count on her"
+accept = ["always count on her", "count on her"]
+hint = { vi = "tôi luôn có thể trông cậy vào cô ấy" }
+
+[[items]]
+id = "in-common"
+kind = "word"
+phrase = "a lot in common"
+accept = ["lot in common"]
+meaning = "sharing many interests or opinions"
+example = "We have a lot in common, especially our love of music."
+hint = { vi = "có nhiều điểm chung" }
+
+[[items]]
+id = "should-have"
+kind = "repeat"
+phrase = "i should have apologised sooner"
+accept = ["should have apologised", "should have apologized sooner"]
+hint = { vi = "lẽ ra tôi nên xin lỗi sớm hơn" }
+
+[[items]]
+id = "talk-friend"
+kind = "talk"
+prompt = "Describe your oldest friend. How did you meet, and why do you still get on so well?"

@@ -1,0 +1,49 @@
+id = "en-b1-shopping"
+title = "Shopping and complaints"
+target = "en"
+level = "B1"
+intro = "Let's practise returning something and making a polite complaint."
+
+[[items]]
+id = "return"
+kind = "repeat"
+phrase = "i would like to return this jacket"
+accept = ["return this jacket"]
+hint = { vi = "tôi muốn trả lại chiếc áo khoác này" }
+
+[[items]]
+id = "doesnt-fit"
+kind = "repeat"
+phrase = "it does not fit me"
+accept = ["it doesnt fit me", "does not fit"]
+hint = { vi = "nó không vừa với tôi" }
+
+[[items]]
+id = "receipt"
+kind = "word"
+phrase = "the receipt"
+accept = ["a receipt"]
+meaning = "the paper that shows what you paid"
+example = "Do you still have the receipt?"
+hint = { vi = "hóa đơn" }
+
+[[items]]
+id = "refund"
+kind = "word"
+phrase = "a full refund"
+accept = ["full refund"]
+meaning = "all your money given back"
+example = "The shop gave me a full refund."
+hint = { vi = "hoàn tiền toàn bộ" }
+
+[[items]]
+id = "speak-manager"
+kind = "repeat"
+phrase = "could i speak to the manager"
+accept = ["speak to the manager"]
+hint = { vi = "tôi có thể nói chuyện với quản lý không" }
+
+[[items]]
+id = "talk-complaint"
+kind = "talk"
+prompt = "Imagine you bought headphones and one side does not work. Tell me what you say to the shop assistant."

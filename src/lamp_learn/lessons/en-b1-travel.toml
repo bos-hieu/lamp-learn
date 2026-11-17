@@ -1,0 +1,55 @@
+id = "en-b1-travel"
+title = "Travel: airport and hotel"
+target = "en"
+level = "B1"
+intro = "Today you are travelling. Let's practise the airport and the hotel."
+
+[[items]]
+id = "check-in"
+kind = "repeat"
+phrase = "i would like to check in please"
+accept = ["check in please", "i would like to check in"]
+hint = { vi = "tôi muốn làm thủ tục nhận phòng" }
+
+[[items]]
+id = "aisle-seat"
+kind = "repeat"
+phrase = "could i have an aisle seat"
+accept = ["an aisle seat"]
+hint = { vi = "cho tôi ghế cạnh lối đi được không" }
+
+[[items]]
+id = "boarding-pass"
+kind = "word"
+phrase = "boarding pass"
+meaning = "the card or ticket that lets you get on the plane"
+example = "Please show your boarding pass at the gate."
+hint = { vi = "thẻ lên máy bay" }
+
+[[items]]
+id = "delayed"
+kind = "repeat"
+phrase = "my flight has been delayed"
+accept = ["the flight has been delayed", "flight has been delayed"]
+hint = { vi = "chuyến bay của tôi bị hoãn" }
+
+[[items]]
+id = "breakfast-included"
+kind = "repeat"
+phrase = "is breakfast included in the price"
+accept = ["is breakfast included"]
+hint = { vi = "giá phòng có bao gồm bữa sáng không" }
+
+[[items]]
+id = "luggage"
+kind = "word"
+phrase = "my luggage is missing"
+accept = ["luggage is missing"]
+meaning = "the bags you travel with did not arrive"
+example = "Excuse me, my luggage is missing. Where can I report it?"
+hint = { vi = "hành lý của tôi bị thất lạc" }
+
+[[items]]
+id = "talk-trip"
+kind = "talk"
+prompt = "Tell me about the best trip you have ever taken. Where did you go, and what happened?"

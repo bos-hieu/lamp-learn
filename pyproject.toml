@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lamp-learn"
+version = "0.1.0"
+description = "Language lessons on a lampOS lamp: drills, new words and practice talks, built on the lampos SDK"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["lampos>=0.2", "tomli>=2; python_version < '3.11'"]
+
+[project.urls]
+Source = "https://github.com/bos-hieu/lamp-learn"
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.22,<2"]
+test = ["pytest>=8", "pytest-asyncio>=0.23", "mcp>=1.22,<2"]
+
+[project.scripts]
+lamp-learn = "lamp_learn.cli:main"
+lamp-learn-mcp = "lamp_learn.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+lamp_learn = ["lessons/*.toml", "web.html", "skills/*/*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

@@ -1,0 +1,47 @@
+id = "en-c2-formal"
+title = "Formal and academic register"
+target = "en"
+level = "C2"
+intro = "Let's practise the language of reports, papers and formal speeches."
+
+[[items]]
+id = "worth-noting"
+kind = "repeat"
+phrase = "it is worth noting that"
+accept = ["its worth noting that", "worth noting that"]
+hint = { vi = "điều đáng lưu ý là" }
+
+[[items]]
+id = "findings-suggest"
+kind = "repeat"
+phrase = "the findings would seem to suggest"
+accept = ["the findings seem to suggest", "findings would seem to suggest"]
+hint = { vi = "các kết quả dường như cho thấy" }
+
+[[items]]
+id = "ubiquitous"
+kind = "word"
+phrase = "ubiquitous"
+meaning = "found everywhere"
+example = "Smartphones have become ubiquitous in modern life."
+hint = { vi = "có mặt ở khắp nơi" }
+
+[[items]]
+id = "inextricably"
+kind = "word"
+phrase = "inextricably linked"
+meaning = "so closely connected that they cannot be separated"
+example = "Economic growth and education are inextricably linked."
+hint = { vi = "gắn bó chặt chẽ không thể tách rời" }
+
+[[items]]
+id = "by-no-means"
+kind = "repeat"
+phrase = "this is by no means an exhaustive list"
+accept = ["by no means an exhaustive list", "by no means exhaustive"]
+hint = { vi = "đây hoàn toàn không phải là danh sách đầy đủ" }
+
+[[items]]
+id = "talk-formal"
+kind = "talk"
+prompt = "Summarise, as if in a formal report, the main causes of climate change and one realistic solution."

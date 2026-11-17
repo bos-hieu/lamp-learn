@@ -1,0 +1,48 @@
+id = "en-c2-debate"
+title = "Debate and persuasion"
+target = "en"
+level = "C2"
+intro = "Let's practise building and challenging an argument with precision."
+
+[[items]]
+id = "devils-advocate"
+kind = "repeat"
+phrase = "let me play devils advocate for a moment"
+accept = ["play devils advocate"]
+hint = { vi = "để tôi thử phản biện một chút" }
+
+[[items]]
+id = "doesnt-follow"
+kind = "repeat"
+phrase = "that conclusion does not necessarily follow"
+accept = ["does not necessarily follow", "doesnt necessarily follow"]
+hint = { vi = "kết luận đó chưa chắc đã đúng" }
+
+[[items]]
+id = "notwithstanding"
+kind = "word"
+phrase = "notwithstanding"
+meaning = "in spite of; even though something is true"
+example = "Notwithstanding the risks, the board approved the merger."
+hint = { vi = "bất chấp, mặc dù" }
+
+[[items]]
+id = "conceding"
+kind = "repeat"
+phrase = "while i concede that point"
+accept = ["i concede that point", "concede that point"]
+hint = { vi = "dù tôi thừa nhận điểm đó" }
+
+[[items]]
+id = "crux"
+kind = "word"
+phrase = "the crux of the matter"
+accept = ["crux of the matter"]
+meaning = "the most important and central part of a problem"
+example = "The crux of the matter is who pays for the damage."
+hint = { vi = "mấu chốt của vấn đề" }
+
+[[items]]
+id = "talk-debate"
+kind = "talk"
+prompt = "Should artificial intelligence be allowed to make medical decisions? Argue one side, then concede one point to the other side."

@@ -1,0 +1,46 @@
+id = "en-a1-food"
+title = "Food and drink"
+target = "en"
+level = "A1"
+intro = "Let's practise ordering food and drink."
+
+[[items]]
+id = "hungry"
+kind = "repeat"
+phrase = "i am hungry"
+accept = ["im hungry"]
+hint = { vi = "tôi đói" }
+
+[[items]]
+id = "coffee-please"
+kind = "repeat"
+phrase = "a coffee please"
+accept = ["coffee please"]
+hint = { vi = "cho tôi một ly cà phê" }
+
+[[items]]
+id = "water"
+kind = "word"
+phrase = "a glass of water"
+accept = ["glass of water"]
+meaning = "water in a glass, to drink"
+example = "Can I have a glass of water, please?"
+hint = { vi = "một ly nước" }
+
+[[items]]
+id = "like-rice"
+kind = "repeat"
+phrase = "i like rice and chicken"
+accept = ["rice and chicken"]
+hint = { vi = "tôi thích cơm và thịt gà" }
+
+[[items]]
+id = "how-much"
+kind = "repeat"
+phrase = "how much is it"
+hint = { vi = "cái này bao nhiêu tiền" }
+
+[[items]]
+id = "talk-food"
+kind = "talk"
+prompt = "What is your favourite food? When do you eat it?"

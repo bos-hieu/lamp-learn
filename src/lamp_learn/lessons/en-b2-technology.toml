@@ -1,0 +1,47 @@
+id = "en-b2-technology"
+title = "Technology in our lives"
+target = "en"
+level = "B2"
+intro = "Let's discuss how technology changes the way we live."
+
+[[items]]
+id = "addicted"
+kind = "repeat"
+phrase = "many people are addicted to their phones"
+accept = ["addicted to their phones"]
+hint = { vi = "nhiều người nghiện điện thoại" }
+
+[[items]]
+id = "screen-time"
+kind = "word"
+phrase = "screen time"
+meaning = "the time you spend looking at a phone, computer or TV"
+example = "I try to limit my screen time before bed."
+hint = { vi = "thời gian dùng màn hình" }
+
+[[items]]
+id = "privacy"
+kind = "word"
+phrase = "online privacy"
+meaning = "keeping your personal information safe on the internet"
+example = "Online privacy matters more now that apps collect so much data."
+hint = { vi = "quyền riêng tư trên mạng" }
+
+[[items]]
+id = "used-to"
+kind = "repeat"
+phrase = "we used to write letters by hand"
+accept = ["used to write letters"]
+hint = { vi = "chúng ta từng viết thư tay" }
+
+[[items]]
+id = "double-edged"
+kind = "repeat"
+phrase = "technology is a double edged sword"
+accept = ["a double edged sword", "double edged sword"]
+hint = { vi = "công nghệ là con dao hai lưỡi" }
+
+[[items]]
+id = "talk-tech"
+kind = "talk"
+prompt = "Has technology made people more connected or more lonely? Give me your view with an example."

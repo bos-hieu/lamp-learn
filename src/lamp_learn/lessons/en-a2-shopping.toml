@@ -1,0 +1,46 @@
+id = "en-a2-shopping"
+title = "Shopping for clothes"
+target = "en"
+level = "A2"
+intro = "Let's practise buying clothes in a shop."
+
+[[items]]
+id = "try-on"
+kind = "repeat"
+phrase = "can i try this on"
+accept = ["try this on"]
+hint = { vi = "tôi mặc thử được không" }
+
+[[items]]
+id = "bigger-size"
+kind = "repeat"
+phrase = "do you have a bigger size"
+accept = ["a bigger size", "a larger size"]
+hint = { vi = "bạn có cỡ lớn hơn không" }
+
+[[items]]
+id = "too-expensive"
+kind = "word"
+phrase = "too expensive"
+meaning = "costs more than you want to pay"
+example = "These shoes are nice, but they are too expensive."
+hint = { vi = "đắt quá" }
+
+[[items]]
+id = "pay-by-card"
+kind = "repeat"
+phrase = "can i pay by card"
+accept = ["pay by card"]
+hint = { vi = "tôi trả bằng thẻ được không" }
+
+[[items]]
+id = "ill-take-it"
+kind = "repeat"
+phrase = "i will take it"
+accept = ["ill take it", "i will take this"]
+hint = { vi = "tôi lấy cái này" }
+
+[[items]]
+id = "talk-clothes"
+kind = "talk"
+prompt = "What clothes do you like to wear at the weekend? What colour do you like?"

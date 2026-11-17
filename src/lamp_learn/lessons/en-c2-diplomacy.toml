@@ -1,0 +1,46 @@
+id = "en-c2-diplomacy"
+title = "Hedging and diplomacy"
+target = "en"
+level = "C2"
+intro = "Let's practise saying difficult things politely and with tact."
+
+[[items]]
+id = "with-respect"
+kind = "repeat"
+phrase = "with all due respect"
+hint = { vi = "với tất cả sự tôn trọng" }
+
+[[items]]
+id = "reservations"
+kind = "repeat"
+phrase = "i have some reservations about this"
+accept = ["some reservations about this", "i have reservations"]
+hint = { vi = "tôi có vài băn khoăn về việc này" }
+
+[[items]]
+id = "not-entirely-convinced"
+kind = "repeat"
+phrase = "i am not entirely convinced"
+accept = ["im not entirely convinced", "not entirely convinced"]
+hint = { vi = "tôi chưa hoàn toàn bị thuyết phục" }
+
+[[items]]
+id = "tactful"
+kind = "word"
+phrase = "a tactful reply"
+accept = ["tactful reply", "be tactful"]
+meaning = "careful not to upset people when you say something difficult"
+example = "He sent a tactful reply that said no without hurting anyone."
+hint = { vi = "khéo léo, tế nhị" }
+
+[[items]]
+id = "middle-ground"
+kind = "repeat"
+phrase = "perhaps we could find some middle ground"
+accept = ["find some middle ground", "find a middle ground"]
+hint = { vi = "có lẽ chúng ta có thể tìm điểm chung" }
+
+[[items]]
+id = "talk-diplomacy"
+kind = "talk"
+prompt = "Your manager proposes a plan you think will fail. Tell them, diplomatically, why you disagree and what you would do instead."

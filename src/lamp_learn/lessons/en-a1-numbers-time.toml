@@ -1,0 +1,45 @@
+id = "en-a1-numbers-time"
+title = "Numbers and time"
+target = "en"
+level = "A1"
+intro = "Let's practise numbers and telling the time."
+
+[[items]]
+id = "what-time"
+kind = "repeat"
+phrase = "what time is it"
+hint = { vi = "mấy giờ rồi" }
+
+[[items]]
+id = "three-oclock"
+kind = "repeat"
+phrase = "it is three oclock"
+accept = ["its three oclock", "it is 3 oclock", "its 3 oclock", "three oclock"]
+hint = { vi = "bây giờ là ba giờ" }
+
+[[items]]
+id = "half-past"
+kind = "word"
+phrase = "half past seven"
+accept = ["half past 7"]
+meaning = "thirty minutes after seven"
+example = "I eat breakfast at half past seven."
+hint = { vi = "bảy giờ rưỡi" }
+
+[[items]]
+id = "how-old"
+kind = "repeat"
+phrase = "how old are you"
+hint = { vi = "bạn bao nhiêu tuổi" }
+
+[[items]]
+id = "twenty-years"
+kind = "repeat"
+phrase = "i am twenty years old"
+accept = ["im twenty years old", "i am 20 years old", "im 20 years old", "twenty years old"]
+hint = { vi = "tôi hai mươi tuổi" }
+
+[[items]]
+id = "talk-time"
+kind = "talk"
+prompt = "What time do you get up, and what time do you go to bed?"

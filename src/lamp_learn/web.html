@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lamp-learn: English on the lamp</title>
+<style>
+  :root { --bg:#0f1115; --panel:#181b22; --line:#2a2f3a; --text:#e7e9ee; --dim:#9aa3b2; --ok:#3ecf8e; --bad:#f5a524; --accent:#7aa2ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 -apple-system, system-ui, sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0 12px 0 0; }
+  select, input, button { font:inherit; color:var(--text); background:#222733; border:1px solid var(--line); border-radius:8px; padding:7px 10px; }
+  button { cursor:pointer; } button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.45; cursor:default; }
+  button.primary { background:var(--accent); color:#0b0d12; border-color:var(--accent); font-weight:600; }
+  button.ok { background:#16352a; border-color:var(--ok); } button.bad { background:#3a2c12; border-color:var(--bad); }
+  main { display:grid; grid-template-columns: 300px 1fr 340px; gap:16px; padding:16px 20px; height:calc(100vh - 64px); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; overflow:auto; }
+  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:0 0 10px; }
+  #lampbox { display:flex; flex-direction:column; align-items:center; }
+  #status { margin-top:8px; color:var(--dim); text-align:center; min-height:2.6em; }
+  #log { display:flex; flex-direction:column; gap:6px; }
+  .msg { padding:7px 10px; border-radius:10px; max-width:85%; white-space:pre-wrap; }
+  .say { background:#232a3a; align-self:flex-start; }
+  .turn { background:#2b2340; align-self:flex-start; }
+  .you { background:#1f3a2f; align-self:flex-end; }
+  .heard { color:var(--ok); font-size:13px; align-self:flex-end; }
+  .feedback-right { color:var(--ok); font-size:13px; } .feedback-missed { color:var(--bad); font-size:13px; }
+  .info, .error { font-size:13px; color:var(--dim); } .error { color:#ff7a7a; }
+  #prompt { font-size:24px; font-weight:600; min-height:1.6em; margin:4px 0 12px; }
+  .row { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; } .row > input { flex:1; min-width:0; }
+  table { width:100%; border-collapse:collapse; font-size:13px; } td, th { padding:4px 6px; border-bottom:1px solid var(--line); text-align:left; }
+  .hint { color:var(--dim); font-size:13px; }
+  #mic.on { background:#5a1d1d; border-color:#ff6b6b; }
+  #micheard { margin-top:6px; } #micheard .big { font-size:18px; margin:6px 0; color:var(--text); }
+  .w-ok { color:var(--ok); } .w-miss { color:#ff7a7a; text-decoration:underline wavy; }
+  .verdict-ok { color:var(--ok); } .verdict-close { color:#f5d36b; } .verdict-miss { color:#ff7a7a; }
+</style>
+</head>
+<body>
+<header>
+  <h1>💡 lamp-learn</h1>
+  <label>Lesson <select id="lesson"></select></label>
+  <label>Coach speaks <select id="language"><option value="en">English</option><option value="vi">Vietnamese</option></select></label>
+  <label>Listen <input id="listen" type="number" min="3" max="60" value="15" style="width:64px"> s</label>
+  <label><input id="due" type="checkbox"> only due</label>
+  <label title="Mic answers: count a close answer (most words right) as right. A real lamp is strict."><input id="practice" type="checkbox" checked> practice mode (close answers count)</label>
+  <button id="start" class="primary">Start lesson</button>
+  <button id="stop" disabled>Stop</button>
+  <span class="hint">or</span>
+  <label title="A real-time conversation with the lamp's own AI as your tutor (needs a lamp with its AI: lamp-sim has none)">Free talk
+    <select id="topic"><option>free</option><option>daily</option><option>travel</option><option>food</option><option>work</option><option>hobbies</option><option>technology</option><option>opinions</option></select>
+    <select id="level"><option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>C1</option><option>C2</option></select>
+  </label>
+  <button id="freetalk">💬 Start free talk</button>
+  <span id="conn" class="hint">connecting…</span>
+</header>
+<main>
+  <section class="panel" id="lampbox">
+    <h2>The lamp (lamp-sim)</h2>
+    <svg id="lamp" viewBox="0 0 220 260" width="240" height="280" aria-label="the lamp">
+      <rect x="60" y="232" width="100" height="14" rx="7" fill="#3a404d"/>
+      <g id="arm"><line x1="110" y1="232" x2="110" y2="150" stroke="#555d6c" stroke-width="10" stroke-linecap="round"/>
+      <line x1="110" y1="150" x2="110" y2="100" stroke="#555d6c" stroke-width="9" stroke-linecap="round"/></g>
+      <g id="head" style="transform-origin:110px 92px; transition: transform .35s ease">
+        <ellipse cx="110" cy="80" rx="58" ry="26" fill="#2c3240"/>
+        <g id="ring"></g>
+      </g>
+    </svg>
+    <div id="status">Pick a lesson and press Start.</div>
+    <p class="hint">The voice plays from your Mac. The ring shows lamp-sim's 32 lights: green when it hears the phrase, orange on a miss.</p>
+  </section>
+  <section class="panel">
+    <h2>Conversation</h2>
+    <div id="log"></div>
+  </section>
+  <section class="panel">
+    <h2>You are the learner</h2>
+    <div class="hint">The lamp asks you to say:</div>
+    <div id="prompt">—</div>
+    <div id="talkbox" style="display:none">
+      <p class="hint">Practice talk: answer freely, in full sentences. On a real lamp the lamp's AI talks back with you;
+        the virtual lamp has no AI, so here you just practise speaking and see what Chrome heard. Not scored.</p>
+      <div id="talklines" class="hint"></div>
+      <div class="row"><button id="talkdone" class="primary">Continue ▶</button></div>
+    </div>
+    <div class="row">
+      <button id="right" class="ok" disabled>✓ Say it right</button>
+      <button id="wrong" class="bad" disabled>✗ Say something else</button>
+    </div>
+    <div class="row">
+      <button id="tap" title="On a real lamp: tap its head">👆 Tap the head: hear it again</button>
+    </div>
+    <div class="row">
+      <input id="text" placeholder="or type what you say…">
+      <button id="send">Say</button>
+    </div>
+    <div class="row">
+      <button id="mic">🎤 Mic: off</button>
+      <span id="micstate" class="hint"></span>
+    </div>
+    <div id="micheard" class="hint"></div>
+    <p class="hint">Answer after the lamp finishes its line: anything said while it speaks is ignored. A wrong line is not reported by the lamp (it only tells which of its phrases it heard), so a miss shows when the countdown ends. Your line goes to lamp-sim as if its recognizer heard it, and the lamp's own phrase matching decides.</p>
+    <h2 style="margin-top:18px">Result</h2>
+    <div id="result" class="hint">—</div>
+    <div class="row"><button id="progress">Show my progress</button></div>
+    <div id="progressbox"></div>
+  </section>
+</main>
+<script>
+const DATA = /*DATA*/null;
+const $ = (id) => document.getElementById(id);
+const token = new URLSearchParams(location.search).get('t');
+let ws, running = false, prompt = null, phrases = [], countdown = null, talking = false;
+
+for (const l of DATA.lessons) {
+  const o = document.createElement('option');
+  o.value = l.id; o.textContent = `${l.level} · ${l.title} (${l.target})`;
+  $('lesson').append(o);
+}
+
+// The ring: 32 lights around the head.
+const ring = $('ring'); const dots = [];
+for (let i = 0; i < 32; i++) {
+  const a = (i / 32) * Math.PI * 2;
+  const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  c.setAttribute('cx', 110 + Math.cos(a) * 48); c.setAttribute('cy', 82 + Math.sin(a) * 18);
+  c.setAttribute('r', 4.2); c.setAttribute('fill', '#111');
+  ring.append(c); dots.push(c);
+}
+function showRing(r) {
+  const px = r.pixels || [];
+  dots.forEach((d, i) => {
+    const col = px[i] || '#000000';
+    d.setAttribute('fill', col === '#000000' ? '#15181f' : col);
+    d.style.filter = col === '#000000' ? '' : `drop-shadow(0 0 4px ${col})`;
+  });
+}
+function nod(kind) {
+  const head = $('head');
+  head.style.transform = kind === 'right' ? 'rotate(0) translateY(10px)' : 'rotate(-12deg)';
+  setTimeout(() => head.style.transform = kind === 'right' ? 'translateY(0)' : 'rotate(12deg)', 350);
+  setTimeout(() => head.style.transform = '', 700);
+}
+
+function addLine(who, text) {
+  const div = document.createElement('div');
+  if (who === 'tap' || who === 'sound' || who === 'listen') return;
+  const cls = { say: 'say', turn: 'turn', you: 'you', heard: 'heard', info: 'info', error: 'error' }[who] || 'info';
+  div.className = 'msg ' + (who === 'feedback' ? 'feedback-' + text : cls);
+  div.textContent = who === 'say' ? '💡 ' + text
+    : who === 'turn' ? '💬 (talk turn) ' + text
+    : who === 'heard' ? 'lamp heard: “' + text + '”'
+    : who === 'feedback' ? (text === 'right' ? '✓ right: green light, nod' : '✗ missed: orange light')
+    : text;
+  $('log').append(div); div.scrollIntoView({ block: 'end' });
+}
+
+function setRunning(on) {
+  running = on;
+  $('start').disabled = $('freetalk').disabled = on; $('stop').disabled = !on;
+  $('right').disabled = $('wrong').disabled = !on || !prompt;
+  if (!on) { prompt = null; talking = false; $('talkbox').style.display = 'none'; micHalt(); clearInterval(countdown); $('prompt').textContent = '—'; $('status').textContent = 'Not running.'; }
+}
+
+function connect() {
+  ws = new WebSocket(`ws://${location.host}/ws?t=${encodeURIComponent(token)}`);
+  ws.onopen = () => { $('conn').textContent = 'connected'; };
+  ws.onclose = () => { $('conn').textContent = 'disconnected: retrying…'; setTimeout(connect, 1500); };
+  ws.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'line') {
+      addLine(m.who, m.text);
+      if (m.who === 'say' || m.who === 'turn') { clearInterval(countdown); micHalt(); $('status').textContent = '🔊 the lamp is speaking…'; }
+      if (m.who === 'feedback') {
+        nod(m.text); prompt = null; micHalt(); $('prompt').textContent = '—';
+        $('right').disabled = $('wrong').disabled = true;
+      }
+    } else if (m.type === 'prompt') {
+      prompt = m.phrase; phrases = m.phrases || [m.phrase]; $('prompt').textContent = '“' + m.phrase + '”';
+      $('right').disabled = $('wrong').disabled = !running;
+      clearInterval(countdown);
+      let left = +$('listen').value;
+      const tick = () => {
+        if (!prompt) return clearInterval(countdown);
+        $('status').textContent = left > 0 ? `👂 your turn: say it now (${left} s)` : '⌛ time is up';
+        left -= 1;
+      };
+      tick(); countdown = setInterval(tick, 1000);
+      micListen();
+    } else if (m.type === 'talk') {
+      talking = true; prompt = null;
+      $('prompt').textContent = '💬 ' + m.prompt;
+      $('talklines').textContent = ''; $('talkbox').style.display = '';
+      $('right').disabled = $('wrong').disabled = true;
+      $('status').textContent = '💬 your turn to talk: press Continue when done';
+      micListen();
+    } else if (m.type === 'talk_end') {
+      talking = false; micHalt(); $('talkbox').style.display = 'none'; $('prompt').textContent = '—';
+    } else if (m.type === 'freetalk_end') {
+      const r = m.result;
+      $('status').textContent = r.why ? `Free talk ended: ${r.why}` : `Free talk: ${r.turns} turn(s), ${Math.round(r.seconds)} s`;
+      $('result').textContent = 'Free talk is not scored: what you said stays on the lamp.';
+    } else if (m.type === 'ring') showRing(m.ring);
+    else if (m.type === 'state') {
+      setRunning(m.running);
+      if (m.running && m.freetalk) $('status').textContent = '💬 free talk: speak to the lamp after it asks';
+      if (m.running && m.lesson) { $('log').textContent = ''; $('result').textContent = '—'; $('status').textContent = 'Lesson: ' + m.lesson.title; }
+    } else if (m.type === 'result') {
+      const r = m.result; const t = document.createElement('table');
+      t.innerHTML = '<tr><th>Item</th><th>Result</th></tr>';
+      for (const it of r.items) {
+        const tr = document.createElement('tr');
+        const a = document.createElement('td'); a.textContent = it.item;
+        const b = document.createElement('td');
+        b.textContent = it.right === null ? 'talk' : it.right ? `✓ (${it.tries} ${it.tries > 1 ? 'tries' : 'try'})` : '✗ missed';
+        tr.append(a, b); t.append(tr);
+      }
+      const head = document.createElement('div'); head.textContent = `${r.right} of ${r.scored} right`; head.style.fontWeight = '600';
+      $('result').textContent = ''; $('result').append(head, t);
+    } else if (m.type === 'progress') {
+      const t = document.createElement('table');
+      t.innerHTML = '<tr><th>Lesson</th><th>Seen</th><th>Mastered</th><th>Due</th></tr>';
+      for (const r of m.rows) {
+        const tr = document.createElement('tr');
+        for (const v of [r.lesson, `${r.seen}/${r.items}`, r.mastered, r.due]) { const td = document.createElement('td'); td.textContent = v; tr.append(td); }
+        t.append(tr);
+      }
+      $('progressbox').textContent = ''; $('progressbox').append(t);
+    }
+  };
+}
+connect();
+
+const send = (m) => ws && ws.readyState === 1 && ws.send(JSON.stringify(m));
+$('start').onclick = () => send({ op: 'start', lesson: $('lesson').value, language: $('language').value, listen: +$('listen').value, due: $('due').checked });
+$('stop').onclick = () => send({ op: 'stop' });
+$('freetalk').onclick = () => { $('log').textContent = ''; send({ op: 'free_talk', topic: $('topic').value, level: $('level').value }); };
+$('right').onclick = () => prompt && send({ op: 'hear', text: prompt });
+$('wrong').onclick = () => send({ op: 'hear', text: 'um sorry what' });
+$('send').onclick = () => {
+  const v = $('text').value.trim(); if (!v) return;
+  if (talking) talkLine(v); else send({ op: 'hear', text: v });
+  $('text').value = '';
+};
+$('text').onkeydown = (e) => { if (e.key === 'Enter') $('send').onclick(); };
+$('progress').onclick = () => send({ op: 'progress' });
+$('talkdone').onclick = () => send({ op: 'talk_done' });
+$('tap').onclick = () => send({ op: 'tap' });
+function talkLine(text) {
+  const d = document.createElement('div'); d.textContent = '🗣 ' + text; $('talklines').append(d);
+  addLine('you', text);
+}
+
+// Matching, as the lamp does it (docs/control.md, phrase.heard): lowercase,
+// apostrophes dropped, a run of whole words with their letters joined, and the
+// heard run may end in one "s" more. Then, for practice mode, a close match:
+// most of the phrase's words, in order, each the same or nearly (a letter or two).
+const words = (s) => s.toLowerCase().replace(/['’]/g, '').split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+function exactIn(heard, phrase) {
+  const target = phrase.join('');
+  for (let i = 0; i < heard.length; i++) {
+    let joined = '';
+    for (let j = i; j < heard.length && joined.length < target.length + 1; j++) {
+      joined += heard[j];
+      if (joined === target || joined === target + 's') return true;
+    }
+  }
+  return false;
+}
+function lev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+// Near: one letter off (a sound-alike such as isle/aisle, meat/meet), two in a
+// long word; never a short word, where one letter is a different word.
+function near(a, b) {
+  if (a === b || a + 's' === b) return 'ok';
+  const long = Math.max(a.length, b.length);
+  if (long < 4) return null;
+  return lev(a, b) <= (long >= 9 ? 2 : 1) ? 'near' : null;
+}
+// A word the recognizer split ("to morrow", "every one") joined back when the
+// two pieces make one of the phrase's words.
+function rejoin(heard, phrase) {
+  const out = [];
+  for (let j = 0; j < heard.length; j++) {
+    const two = heard[j] + (heard[j + 1] || '');
+    if (j + 1 < heard.length && !phrase.includes(heard[j]) && phrase.some(w => near(w, two) === 'ok')) { out.push(two); j++; }
+    else out.push(heard[j]);
+  }
+  return out;
+}
+// Longest in-order match of the phrase's words in what was heard: each phrase word ok, near or missed.
+function closeness(heard, phrase) {
+  heard = rejoin(heard, phrase);
+  const n = phrase.length, m = heard.length;
+  const best = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) {
+    const s = near(phrase[i], heard[j]);
+    best[i][j] = Math.max(best[i + 1][j], best[i][j + 1], s ? best[i + 1][j + 1] + (s === 'ok' ? 1 : 0.75) : 0);
+  }
+  const marks = []; let i = 0, j = 0;
+  while (i < n) {
+    if (j < m) {
+      const s = near(phrase[i], heard[j]);
+      if (s && best[i][j] === best[i + 1][j + 1] + (s === 'ok' ? 1 : 0.75)) { marks.push(s); i++; j++; continue; }
+      if (best[i][j + 1] >= best[i + 1][j]) { j++; continue; }
+    }
+    marks.push('miss'); i++;
+  }
+  return { score: best[0][0] / n, marks };
+}
+function judge(guesses) {
+  const practice = $('practice').checked;
+  const wanted = phrases.map(p => ({ text: p, words: words(p) }));
+  let exact = null, close = null;
+  for (const g of guesses) {
+    const heard = words(g.text);
+    for (const p of wanted) {
+      if (!exact && exactIn(heard, p.words)) exact = { guess: g, phrase: p };
+      const c = closeness(heard, p.words);
+      if (!close || c.score > close.score) close = { ...c, guess: g, phrase: p };
+    }
+  }
+  const top = guesses[0];
+  const box = $('micheard'); box.textContent = '';
+  const line = (cls, text) => { const d = document.createElement('div'); if (cls) d.className = cls; d.textContent = text; box.append(d); return d; };
+  const conf = (g) => g.confidence ? ` (${Math.round(g.confidence * 100)}% sure)` : '';
+  line('big', `Chrome heard: “${top.text}”${conf(top)}`);
+  if (guesses.length > 1) line('', 'other guesses: ' + guesses.slice(1).map(g => `“${g.text}”`).join(', '));
+  const shown = exact ? exact.phrase : close.phrase;
+  const marks = exact ? shown.words.map(() => 'ok') : close.marks;
+  const target = line('big', '');
+  shown.words.forEach((w, k) => {
+    const s = document.createElement('span');
+    s.className = marks[k] === 'ok' ? 'w-ok' : marks[k] === 'near' ? 'verdict-close' : 'w-miss';
+    s.textContent = w + ' '; target.append(s);
+  });
+  const fix = shown.words.filter((_, k) => marks[k] !== 'ok');
+  if (exact) {
+    line('verdict-ok', exact.guess === top ? '✓ matches the phrase' : `✓ matches, from Chrome's other guess “${exact.guess.text}”`);
+    send({ op: 'hear', text: exact.guess.text });
+  } else if (practice && close.score >= 0.75 && shown.words.length >= 2) {
+    line('verdict-close', `≈ close enough (${Math.round(close.score * 100)}%): counted as right in practice mode`);
+    line('', 'work on: ' + fix.join(', '));
+    send({ op: 'hear', text: close.phrase.text });
+  } else {
+    line('verdict-miss', `✗ not the phrase (${Math.round(close.score * 100)}% of it)` + (practice ? '' : ' — practice mode is off'));
+    if (fix.length) line('', 'work on: ' + fix.join(', '));
+    send({ op: 'hear', text: top.text });
+  }
+}
+
+// The laptop's microphone, through the browser's own recognizer (Chrome/Edge).
+// Hands-free: with the mic on, it listens only on your turn (after the lamp has
+// said its line, so the lamp's own voice from the speakers isn't taken as yours),
+// starts again after each pause until the turn ends, and sends each finished line.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MIC_ERRORS = {
+  'not-allowed': 'microphone blocked: allow it for this page (lock icon in the address bar)',
+  'service-not-allowed': 'speech recognition blocked by the browser',
+  'audio-capture': 'no microphone found',
+  'network': "Chrome's speech service can't be reached (it needs the internet)",
+  'no-speech': 'heard nothing: speak a bit louder or closer',
+  'language-not-supported': 'en-US recognition not available in this browser',
+};
+let micOn = false, recActive = false, rec = null;
+function micLabel() { $('mic').textContent = micOn ? '🎤 Mic: on' : '🎤 Mic: off'; $('mic').classList.toggle('on', micOn); }
+function micListen() {
+  if (!rec || !micOn || !(prompt || talking) || recActive) return;
+  try { rec.start(); recActive = true; $('micstate').textContent = '🔴 listening…'; } catch (e) { /* already started */ }
+}
+function micHalt() { if (rec && recActive) { try { rec.abort(); } catch (e) {} } recActive = false; if (micOn) $('micstate').textContent = 'waits for your turn'; }
+if (!SR) { $('mic').disabled = true; $('micstate').textContent = 'needs Chrome or Edge'; }
+else {
+  rec = new SR(); rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 5;
+  rec.onresult = (e) => {
+    const r = e.results[e.results.length - 1];
+    if (!r.isFinal) { $('micheard').textContent = '… ' + r[0].transcript.trim(); return; }
+    const guesses = [...r].map(a => ({ text: a.transcript.trim(), confidence: a.confidence })).filter(g => g.text);
+    if (!guesses.length) return;
+    if (talking) { $('micheard').textContent = ''; talkLine(guesses[0].text); } else judge(guesses);
+  };
+  rec.onerror = (e) => {
+    recActive = false;
+    if (e.error === 'aborted') return;
+    $('micstate').textContent = MIC_ERRORS[e.error] || ('mic: ' + e.error);
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') { micOn = false; micLabel(); }
+  };
+  rec.onend = () => { recActive = false; if (micOn && (prompt || talking)) setTimeout(micListen, 250); else if (micOn) $('micstate').textContent = 'waits for your turn'; };
+  $('mic').onclick = () => {
+    micOn = !micOn; micLabel();
+    if (micOn) { $('micstate').textContent = prompt ? '' : 'waits for your turn'; micListen(); }
+    else { micHalt(); $('micstate').textContent = ''; }
+  };
+}
+</script>
+</body>
+</html>

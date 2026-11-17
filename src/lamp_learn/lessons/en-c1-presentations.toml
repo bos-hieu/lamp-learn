@@ -1,0 +1,47 @@
+id = "en-c1-presentations"
+title = "Giving a presentation"
+target = "en"
+level = "C1"
+intro = "Let's practise the signposting language of a strong presentation."
+
+[[items]]
+id = "outline"
+kind = "repeat"
+phrase = "i have divided my talk into three parts"
+accept = ["divided my talk into three parts"]
+hint = { vi = "tôi chia bài nói thành ba phần" }
+
+[[items]]
+id = "turning-to"
+kind = "repeat"
+phrase = "turning now to the next point"
+accept = ["turning to the next point", "now to the next point"]
+hint = { vi = "chuyển sang ý tiếp theo" }
+
+[[items]]
+id = "as-you-can-see"
+kind = "repeat"
+phrase = "as you can see from this chart"
+accept = ["as you can see from the chart"]
+hint = { vi = "như các bạn thấy trên biểu đồ này" }
+
+[[items]]
+id = "key-takeaway"
+kind = "word"
+phrase = "the key takeaway"
+accept = ["key takeaway"]
+meaning = "the most important idea you want the audience to remember"
+example = "The key takeaway is that small changes add up."
+hint = { vi = "điểm mấu chốt cần nhớ" }
+
+[[items]]
+id = "questions"
+kind = "repeat"
+phrase = "i would be happy to take any questions"
+accept = ["happy to take any questions", "take any questions"]
+hint = { vi = "tôi sẵn lòng trả lời câu hỏi" }
+
+[[items]]
+id = "talk-present"
+kind = "talk"
+prompt = "Give me a one minute presentation about your city. Use signposting like firstly, turning now to, and to sum up."

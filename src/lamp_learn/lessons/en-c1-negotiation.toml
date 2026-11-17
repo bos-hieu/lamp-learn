@@ -1,0 +1,49 @@
+id = "en-c1-negotiation"
+title = "Negotiating"
+target = "en"
+level = "C1"
+intro = "Let's practise negotiating a deal: firm, flexible and polite."
+
+[[items]]
+id = "meet-halfway"
+kind = "repeat"
+phrase = "could we meet each other halfway"
+accept = ["meet each other halfway", "meet halfway"]
+hint = { vi = "chúng ta có thể mỗi bên nhượng bộ một nửa không" }
+
+[[items]]
+id = "deal-breaker"
+kind = "word"
+phrase = "a deal breaker"
+accept = ["deal breaker"]
+meaning = "one thing that makes you refuse the whole agreement"
+example = "A delivery time of six months would be a deal breaker for us."
+hint = { vi = "điều kiện khiến thương vụ đổ vỡ" }
+
+[[items]]
+id = "in-a-position"
+kind = "repeat"
+phrase = "we are not in a position to accept that"
+accept = ["not in a position to accept"]
+hint = { vi = "chúng tôi không thể chấp nhận điều đó" }
+
+[[items]]
+id = "provided-that"
+kind = "repeat"
+phrase = "provided that payment is made upfront"
+accept = ["provided that payment is made"]
+hint = { vi = "với điều kiện thanh toán trước" }
+
+[[items]]
+id = "leverage"
+kind = "word"
+phrase = "leverage"
+accept = ["more leverage"]
+meaning = "an advantage that gives you more power in a negotiation"
+example = "Having another offer gives us leverage."
+hint = { vi = "lợi thế đàm phán" }
+
+[[items]]
+id = "talk-negotiate"
+kind = "talk"
+prompt = "You want a higher salary but the company offers less. Negotiate with me, and suggest a compromise."

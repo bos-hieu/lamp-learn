@@ -1,0 +1,43 @@
+id = "en-a1-desk"
+title = "Things on my desk"
+target = "en"
+level = "A1"
+intro = "Let's learn the names of things on your desk."
+
+[[items]]
+id = "notebook"
+kind = "word"
+phrase = "a notebook"
+accept = ["notebook"]
+meaning = "a book of empty pages you write in"
+example = "I write my homework in a notebook."
+hint = { vi = "quyển vở" }
+
+[[items]]
+id = "pencil"
+kind = "word"
+phrase = "a pencil please"
+accept = ["pencil please"]
+meaning = "a thin stick you write or draw with"
+example = "Can I borrow a pencil, please?"
+hint = { vi = "cho tôi một cây bút chì" }
+
+[[items]]
+id = "keyboard"
+kind = "word"
+phrase = "the keyboard"
+accept = ["keyboard"]
+meaning = "the keys you type on"
+example = "My keyboard is next to the lamp."
+hint = { vi = "bàn phím" }
+
+[[items]]
+id = "turn-on-light"
+kind = "repeat"
+phrase = "turn on the light"
+hint = { vi = "bật đèn lên" }
+
+[[items]]
+id = "talk-desk"
+kind = "talk"
+prompt = "Look at your desk. Tell me three things you can see, in English."

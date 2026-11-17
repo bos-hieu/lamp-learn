@@ -1,0 +1,47 @@
+id = "en-c1-hypotheticals"
+title = "Regrets and hypotheticals"
+target = "en"
+level = "C1"
+intro = "Let's practise talking about the past that could have been, and the future that might be."
+
+[[items]]
+id = "had-i-known"
+kind = "repeat"
+phrase = "had i known i would have called you"
+accept = ["had i known", "i would have called you"]
+hint = { vi = "nếu tôi biết thì tôi đã gọi cho bạn rồi" }
+
+[[items]]
+id = "wish-had"
+kind = "repeat"
+phrase = "i wish i had studied harder"
+accept = ["wish i had studied harder"]
+hint = { vi = "giá mà tôi đã học chăm hơn" }
+
+[[items]]
+id = "if-it-werent"
+kind = "repeat"
+phrase = "if it were not for your help"
+accept = ["if it wasnt for your help", "if it werent for your help", "were not for your help"]
+hint = { vi = "nếu không có sự giúp đỡ của bạn" }
+
+[[items]]
+id = "in-hindsight"
+kind = "word"
+phrase = "in hindsight"
+accept = ["with hindsight"]
+meaning = "looking back now and understanding what you did not before"
+example = "In hindsight, taking that job was the right choice."
+hint = { vi = "nhìn lại thì" }
+
+[[items]]
+id = "were-to"
+kind = "repeat"
+phrase = "were you to win the lottery what would you do"
+accept = ["were you to win the lottery"]
+hint = { vi = "nếu bạn trúng xổ số thì bạn sẽ làm gì" }
+
+[[items]]
+id = "talk-regret"
+kind = "talk"
+prompt = "If you could go back ten years, what would you do differently, and why?"

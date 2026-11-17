@@ -1,0 +1,38 @@
+id = "en-a2-daily"
+title = "My daily routine"
+target = "en"
+level = "A2"
+intro = "Today we talk about your day."
+
+[[items]]
+id = "wake-up"
+kind = "repeat"
+phrase = "i wake up at seven"
+accept = ["wake up at seven", "i wake up at 7"]
+hint = { vi = "tôi thức dậy lúc bảy giờ" }
+
+[[items]]
+id = "breakfast"
+kind = "repeat"
+phrase = "i have breakfast with my family"
+accept = ["breakfast with my family"]
+hint = { vi = "tôi ăn sáng cùng gia đình" }
+
+[[items]]
+id = "go-to-work"
+kind = "repeat"
+phrase = "then i go to work"
+accept = ["i go to work"]
+hint = { vi = "sau đó tôi đi làm" }
+
+[[items]]
+id = "evening"
+kind = "repeat"
+phrase = "in the evening i read a book"
+accept = ["i read a book"]
+hint = { vi = "buổi tối tôi đọc sách" }
+
+[[items]]
+id = "talk-day"
+kind = "talk"
+prompt = "Tell me about your day yesterday. What did you do in the morning?"

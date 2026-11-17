@@ -1,0 +1,13 @@
+# English lesson: the lamp's model hands "start my English lesson" to the
+# learner's computer, which runs the lesson (lamp-learn listen). Started by
+# its tool when someone says it. No trigger, no [ask]: a person asked.
+needs = ["voice"]
+kind = "installable"
+version = "0.1.1"
+tool = "start_english_lesson"
+
+[permissions]
+speak = true
+
+[[do]]
+say = "Say only, in a few words: 'Okay, your English lesson is starting.' Nothing more: the learner's computer runs the lesson and speaks next."
