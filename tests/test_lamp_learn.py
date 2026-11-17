@@ -417,3 +417,50 @@ def test_level_phrases_fit_the_lamps_limits():
     assert len(WAKE) <= PHRASES_MAX
     for phrase in WAKE:
         assert sum(c.isalpha() for c in phrase) >= PHRASE_MIN_LETTERS and len(phrase) <= PHRASE_MAX_CHARS
+
+
+def test_next_and_repeat_choose_the_right_lesson(tmp_path):
+    from lamp_learn.listen import choose
+    from lamp_learn.progress import Progress
+
+    progress = Progress(tmp_path / "p.json")
+    # Nothing practised: repeat falls back to the first lesson, with a note.
+    found, _, note = choose("repeat english lesson", progress)
+    assert found.level == "A1" and "no lesson to repeat" in note
+    for item in found.items:
+        if item.kind != "talk":
+            progress.record(found.id, item.id, True, now=1000.0)
+    # Repeat gives the last lesson, every item; next skips it.
+    again, due_only, note = choose("english lesson again", progress)
+    assert again.id == found.id and not due_only and not note
+    after, due_only, _ = choose("next english lesson", progress)
+    assert after.id != found.id and not due_only
+
+
+def test_wake_prefers_next_over_the_plain_lesson_phrase():
+    from lamp_learn.listen import START_LESSON, WAKE
+
+    assert "next english lesson" in WAKE and "english lesson" in START_LESSON
+
+
+def test_reset_forgets_one_lesson_or_all(tmp_path):
+    from lamp_learn.cli import main
+    from lamp_learn.progress import Progress
+
+    path = tmp_path / "progress.json"
+    p = Progress(path)
+    p.record("en-a1-greetings", "good-morning", True)
+    p.record("en-a1-desk", "pencil", True)
+    import os
+
+    os.environ["LAMP_LEARN_HOME"] = str(tmp_path)
+    try:
+        assert main(["reset", "en-a1-desk", "--yes"]) == 0
+        left = Progress(path)._cards()
+        assert list(left) == ["en-a1-greetings/good-morning"]
+        assert (tmp_path / "progress.json.bak").exists()
+        assert main(["reset", "no-such-lesson", "--yes"]) == 2
+        assert main(["reset", "--yes"]) == 0
+        assert Progress(path)._cards() == {}
+    finally:
+        del os.environ["LAMP_LEARN_HOME"]

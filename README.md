@@ -68,7 +68,12 @@ python3 -m venv .venv
    Turn Python on in System Settings, Privacy & Security, Local Network; if it isn't
    listed, see the guide's "On a Mac when Python is not listed".
 
-2. **Run a lesson:** `.venv/bin/lamp-learn run en-a1-greetings -v`.
+2. **Run a lesson:** `.venv/bin/lamp-learn run en-a1-greetings -v`, or
+   `run next` (the next lesson not started) or `run repeat` (the last one again).
+
+   Start over with `.venv/bin/lamp-learn reset` (every lesson) or
+   `reset en-a1-greetings ...` (some). It asks first (`--yes` skips that) and keeps
+   the old file as `progress.json.bak`. `--learner NAME` keeps separate scores.
 
 3. **Or leave listening mode running** and start lessons by talking to the lamp:
 
@@ -80,6 +85,8 @@ python3 -m venv .venv
    |---|---|
    | "start my English lesson" | reviews due first, else the next new lesson |
    | "beginner / intermediate / advanced English lesson" | the same, from A1-A2, B1-B2 or C1-C2 |
+   | "next English lesson" / "new English lesson" | the next lesson not started yet, skipping reviews |
+   | "repeat English lesson" / "English lesson again" | the last lesson practised, every item |
    | "English free talk" | a conversation with the lamp's own AI |
 
    On first start it pushes its three skills to the lamp (`english-lesson`,

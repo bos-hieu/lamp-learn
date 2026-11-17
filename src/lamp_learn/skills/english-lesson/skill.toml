@@ -3,7 +3,7 @@
 # its tool when someone says it. No trigger, no [ask]: a person asked.
 needs = ["voice"]
 kind = "installable"
-version = "0.1.1"
+version = "0.1.2"
 tool = "start_english_lesson"
 
 [permissions]

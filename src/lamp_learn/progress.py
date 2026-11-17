@@ -63,6 +63,29 @@ class Progress:
         self.save()
         return card
 
+    def last_lesson(self) -> str | None:
+        """The lesson practised most recently, or None before the first."""
+        cards = self._cards()
+        if not cards:
+            return None
+        key = max(cards, key=lambda k: cards[k].get("seen", 0))
+        return key.split("/", 1)[0]
+
+    def reset(self, lesson_ids: list[str] | None = None) -> int:
+        """Forget this learner's score, for the given lessons or all of them.
+        The file as it was is kept next to it (progress.json.bak). Returns how
+        many items were forgotten."""
+        cards = self._cards()
+        gone = [k for k in cards if not lesson_ids or k.split("/", 1)[0] in lesson_ids]
+        if not gone:
+            return 0
+        if self.path.exists():
+            self.path.with_name(self.path.name + ".bak").write_text(self.path.read_text(encoding="utf-8"), encoding="utf-8")
+        for k in gone:
+            del cards[k]
+        self.save()
+        return len(gone)
+
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.path.with_suffix(".tmp")

@@ -8,6 +8,10 @@ Leave it running. It registers a few phrases with the lamp and waits:
   next lesson not started yet, in level order.
 - "beginner / intermediate / advanced English lesson": the same, from
   A1-A2, B1-B2 or C1-C2 only ("start my advanced English lesson" works too).
+- "next English lesson" (or "new English lesson"): the next lesson not
+  started yet, skipping reviews.
+- "repeat English lesson" (or "English lesson again"): the last lesson
+  practised, every item.
 - "English free talk": a conversation with the lamp's own model (free talk).
 
 It hears these through the lamp's own phrase matching, as a lesson's answers
@@ -34,8 +38,11 @@ LEVEL_LESSON = {
     "intermediate english lesson": ("B1", "B2"),
     "advanced english lesson": ("C1", "C2"),
 }
+# The next new lesson, skipping reviews; the last lesson again, every item.
+NEXT_LESSON = ("next english lesson", "new english lesson")
+REPEAT_LESSON = ("repeat english lesson", "english lesson again")
 FREE_TALK = ("english free talk",)
-WAKE = START_LESSON + tuple(LEVEL_LESSON) + FREE_TALK
+WAKE = START_LESSON + tuple(LEVEL_LESSON) + NEXT_LESSON + REPEAT_LESSON + FREE_TALK
 
 # Phrases from one line arrive together: how long to wait for a second.
 SAME_LINE_S = 0.8
@@ -68,6 +75,38 @@ def pick(progress: Progress, levels: tuple[str, ...] | None = None) -> tuple[les
     return (found[0], False) if found else None
 
 
+def pick_next(progress: Progress, levels: tuple[str, ...] | None = None) -> lessons.Lesson | None:
+    """The next lesson not fully started, in level order; None when all are."""
+    found = [l for l in lessons.builtin().values() if not levels or l.level in levels]
+    found.sort(key=lambda l: (LEVEL_ORDER.get(l.level, 9), l.id))
+    for row, l in zip(progress.report(found), found):
+        if row["seen"] < row["items"]:
+            return l
+    return None
+
+
+def choose(phrase: str, progress: Progress, levels: tuple[str, ...] | None = None) -> tuple[lessons.Lesson | None, bool, str]:
+    """What a heard phrase asks for: (lesson, due items only, a line to say
+    first or ""). No lesson means nothing fits."""
+    if phrase in REPEAT_LESSON:
+        last = progress.last_lesson()
+        found = lessons.builtin().get(last) if last else None
+        if found:
+            return found, False, ""
+        phrase, note = START_LESSON[0], "There is no lesson to repeat yet, so here is your first."
+    elif phrase in NEXT_LESSON:
+        found = pick_next(progress, levels)
+        if found:
+            return found, False, ""
+        phrase, note = START_LESSON[0], "You have started every lesson, so here are your reviews."
+    else:
+        note = ""
+    chosen = pick(progress, LEVEL_LESSON.get(phrase, levels))
+    if chosen is None:
+        return None, False, note
+    return chosen[0], chosen[1], note
+
+
 async def _connect(connect, tries: int = 6):
     """Connect, trying again briefly: a relay or a lamp that just closed the
     last connection may refuse the next for a moment."""
@@ -83,7 +122,7 @@ async def _connect(connect, tries: int = 6):
 async def wait_for_wake(lamp) -> str:
     """Register the wake phrases and return the one heard. A line can hold
     two ("start my advanced English lesson" holds "English lesson" too):
-    after the first, a moment more is given, and a level's phrase wins."""
+    after the first, a moment more is given, and the more specific one wins."""
     loop = asyncio.get_running_loop()
     first: asyncio.Future = loop.create_future()
     got: list[str] = []
@@ -107,7 +146,7 @@ async def wait_for_wake(lamp) -> str:
         raise ConnectionError("the lamp's connection closed while waiting")
     await asyncio.sleep(SAME_LINE_S)
     for phrase in got:
-        if phrase in LEVEL_LESSON:
+        if phrase not in START_LESSON:
             return phrase
     return got[0]
 
@@ -140,7 +179,7 @@ async def serve(
 
                     await install(lamp, log)
                     installed = True
-                log('listening: say "start my English lesson" (or a beginner, intermediate or advanced English lesson) or "English free talk" to the lamp')
+                log('listening: say "start my English lesson", "next English lesson", "repeat English lesson", a beginner, intermediate or advanced English lesson, or "English free talk" to the lamp')
                 phrase = await wait_for_wake(lamp)
             log(f"heard: {phrase}")
             # Let the lamp's own short "starting" line be said first.
@@ -151,11 +190,12 @@ async def serve(
 
                     await free_talk(lamp, "free", talk_level, log=log)
                 else:
-                    chosen = pick(progress, LEVEL_LESSON.get(phrase, levels))
-                    if chosen is None:
+                    found, due, note = choose(phrase, progress, levels)
+                    if note:
+                        await lamp.say(note, wait=True)
+                    if found is None:
                         await lamp.say("I have no lessons for that level.", wait=True)
                     else:
-                        found, due = chosen
                         log(f"lesson: {found.id} ({'reviews due' if due else 'new'})")
                         session = await Session.open(lamp, found, progress=progress, language=language, listen_s=listen_s, log=log)
                         result = await session.run(due_only=due)
