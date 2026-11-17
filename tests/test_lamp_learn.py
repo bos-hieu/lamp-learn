@@ -391,7 +391,7 @@ async def test_listen_starts_a_lesson_on_the_wake_phrase(tmp_path, monkeypatch):
         assert any(l.startswith("lesson done: ") for l in lines), lines
         assert len(connections) == 2  # one to wait, one for the lesson
         pushed = {p.get("name") for p in fake.asked("skill.push") if p.get("name")}
-        assert {"english-lesson", "english-tutor", "english-marks"} <= pushed, pushed
+        assert {"english-tutor"} <= pushed, pushed
 
 
 async def test_wake_prefers_the_level_phrase():
@@ -545,3 +545,21 @@ def test_limited_levels_make_room_for_lessons_by_name():
     assert "list advanced lessons" not in phrases and "list english lessons" in phrases
     assert direct["family lesson"].id == "en-a1-family"
     assert wake_phrases(None)[1] == {}
+
+
+async def test_install_takes_the_old_three_skills_off(tmp_path, monkeypatch):
+    import lamp_learn.freetalk as freetalk
+
+    monkeypatch.setattr(freetalk, "PUSH_GAP_S", 0)
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        await freetalk.install(lamp)  # the one skill
+        old = tmp_path / "english-marks"
+        old.mkdir()
+        (old / "skill.toml").write_text('needs = ["voice"]\nkind = "installable"\nversion = "0.1.1"\ntool = "mark_english"\n\n[permissions]\nspeak = true\n\n[[do]]\nsay = "x"\n')
+        (old / "SKILL.md").write_text("---\nname: english-marks\ndescription: old\n---\n")
+        await lamp.push_skill(str(old))
+        await freetalk.install(lamp)
+        names = {s["name"] for s in await lamp.skills()}
+        assert "english-tutor" in names and "english-marks" not in names
+        await lamp.close()

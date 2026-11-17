@@ -72,9 +72,10 @@ SPOKEN = {"numbers-time": "numbers", "jobinterview": "job interview", "daily": "
 # Phrases from one line arrive together: how long to wait for a second.
 SAME_LINE_S = 0.8
 
-# After a wake phrase, the lamp's model says a short "starting" line
-# (english-lesson); the lesson begins after it.
-START_PAUSE_S = 3.0
+# After a wake phrase, the lamp's model says English Tutor's short lesson
+# line ("Okay. If your lesson app is running, it starts now..."); the lesson
+# begins after it.
+START_PAUSE_S = 6.0
 
 LEVEL_ORDER = {level: n for n, level in enumerate(("A1", "A2", "B1", "B2", "C1", "C2"))}
 
@@ -288,7 +289,7 @@ async def serve(
                 backoff = 1.0
                 if not installed:
                     # The lamp's model learns that these words are the computer's
-                    # to handle (english-lesson), and the tutor's skills.
+                    # to handle (English Tutor's lesson step), and its tutor.
                     from .freetalk import install
 
                     await install(lamp, log)

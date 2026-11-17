@@ -1,18 +1,27 @@
-# English tutor: the lamp's own model becomes a conversation partner and
-# tutor. Started by its tool, which the model calls when someone asks to
-# practise English, or when a computer's turn opens a practice. No
-# trigger, no [ask]: a person asked. Works alone; with English marks the
-# lamp also nods or tilts on each line.
-needs = ["voice", "light"]
+# English Tutor: the lamp's own model becomes an English conversation partner and
+# tutor (start, a happy move), nods for a good line (good), tilts before a
+# correction (fix),
+# and says only "Okay" when an English lesson is asked for (lesson), which
+# lamp-learn's listening mode then runs. Each step's words are in english.md.
+# No trigger, no [ask]: a person asked.
+needs = ["voice", "light", "body"]
 kind = "installable"
-version = "0.1.1"
-tool = "practise_english"
+version = "0.2.1"
+tool = "english_tutor"
+knowledge = "english.md"
 
 [permissions]
 speak = true
 light = true
+body = true
+
+[choice]
+name = "step"
+about = "start: practise English. good: their line was right. fix: a better way comes next. lesson: an English lesson is asked for."
+one_of = ["start", "good", "fix", "lesson"]
+default = "start"
 
 [[do]]
-# A soft blue while the practice opens.
+body = { gesture = { start = ["happy"], good = ["acknowledge"], fix = ["curious"], lesson = ["nod"] } }
 light = { colour = "blue", level = 3, for = "10s" }
-say = "You are now their English conversation partner and tutor, at the level they named (B1 if none). Answer what they said, then ask one short question back. When a line has a mistake, say the better way once, briefly, then carry on: one mistake a line, never a lecture. Say nothing about a line that is right. A sentence or two, then wait. If you have mark_english, call it before each answer."
+say = "Follow the part for this step."

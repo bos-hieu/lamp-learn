@@ -1,9 +1,10 @@
 """Free talk: a real-time English conversation with the lamp's own model.
 
-Nothing outside the lamp answers. lamp-learn pushes two skills to the lamp
-(`skills/`): `english-tutor`, whose tool the lamp's model calls when a
-practice opens and whose note makes it a conversation partner and tutor, and
-`english-marks`, which nods for a good line and tilts before a correction.
+Nothing outside the lamp answers. lamp-learn pushes one skill to the lamp,
+English Tutor (`skills/english-tutor`): its tool, `english_tutor`, is called by the lamp's model with
+step `start` when a practice opens (its note makes the model a conversation
+partner and tutor), then `good` or `fix` before each answer (a nod, or a
+tilt before a correction), and `lesson` when a lesson is asked for.
 Then it opens the practice with `start_turn`: the lamp says the opening line,
 and its model answers the learner's next line, and the next, as long as they
 keep talking.
@@ -28,7 +29,11 @@ try:
 except ModuleNotFoundError:  # Python 3.10
     import tomli as tomllib
 
-SKILLS = ("english-tutor", "english-marks", "english-lesson")
+SKILLS = ("english-tutor",)
+# Skills lamp-learn pushed before, taken off the lamp when English Tutor goes
+# on: the marks and the lesson hand-off (now its good, fix and lesson steps)
+# and "english", its name for a day. (english-tutor 0.1 is replaced in place.)
+OLD_SKILLS = ("english-marks", "english-lesson", "english")
 
 # A turn with no opening line that ends "finished" faster than this answered
 # no one: a person's line and the model's answer take longer.
@@ -99,6 +104,13 @@ async def install(lamp, log: Callable[[str], None] = lambda line: None) -> list[
         await lamp.push_skill(str(skill_folder(name)))
         log(f"skill on the lamp: {name} {skill_version(name)}")
         pushed.append(name)
+    for name in OLD_SKILLS:
+        if name in kept:
+            try:
+                await lamp.remove_skill(name)
+                log(f"skill taken off the lamp: {name} (now part of english-tutor)")
+            except Exception as error:  # a lamp that refuses: the old one stays, harmless
+                log(f"couldn't take {name} off the lamp: {error}")
     return pushed
 
 

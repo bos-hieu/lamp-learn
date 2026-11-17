@@ -239,7 +239,7 @@ def build(link: Link) -> FastMCP:
     @server.tool()
     async def free_talk(topic: str = "free", level: str = "B1", most_turns: int = 20) -> dict:
         """A real-time English conversation with the lamp's own model as tutor.
-        Puts the english-tutor and english-marks skills on the lamp (once), opens
+        Puts the English Tutor skill on the lamp (once), opens
         the practice and keeps it going while the learner talks. Topics: free,
         daily, travel, food, work, hobbies, technology, opinions; levels A1-C2.
         Not scored: what was said stays on the lamp."""

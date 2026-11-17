@@ -94,10 +94,9 @@ python3 -m venv .venv
    **Stop a lesson:** stroke the lamp's head, or say "stop English lesson". What
    you finished is kept; the item it stopped on isn't scored.
 
-   On first start it pushes its three skills to the lamp (`english-lesson`,
-   `english-tutor`, `english-marks`, in `src/lamp_learn/skills/`). They show on the
-   lamp's Skills page in the app. `english-lesson` only makes sense with lamp-learn
-   running; the other two work on their own ("let's practise English").
+   On first start it pushes its skill, English Tutor (`src/lamp_learn/skills/english-tutor`),
+   to the lamp, where it shows on the Skills page in the app. Its tutor works on
+   its own ("let's practise English"); its lesson step hands lessons to lamp-learn.
 
 ## Try it with no lamp
 
@@ -228,9 +227,8 @@ Leitner boxes 1 to 5. An item is due again after 0, 1, 3, 7 or 14 days.
 
     lamp-learn talk --topic travel --level B1 -v
 
-lamp-learn puts two skills on the lamp (`src/lamp_learn/skills/`):
-- `english-tutor`: its tool `practise_english` turns the lamp's model into a conversation partner and tutor;
-- `english-marks`: it nods for a good line and tilts before a correction.
+lamp-learn puts its skill on the lamp (`src/lamp_learn/skills/`):
+- one skill, English Tutor (`english-tutor`): its tool turns the lamp's model into a conversation partner and tutor (step `start`), nods for a good line (`good`) and tilts before a correction (`fix`). Its `lesson` step hands lesson requests to lamp-learn, and tells the learner to practise instead when lamp-learn isn't running. Each step's words are in `english.md`. Before 0.2 these were three skills; lamp-learn takes the old ones off the lamp.
 
 It then opens the practice with `start_turn` and keeps opening turns while you talk. Nothing outside the lamp answers, and what you say stays on the lamp, so free talk is not scored.
 
