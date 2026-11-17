@@ -87,7 +87,7 @@ async def test_drill_right_when_phrase_heard(tmp_path):
         lamp = await fake.connect()
         session = await Session.open(lamp, lesson, listen_s=1.0, progress=Progress(tmp_path / "p.json"), language="en")
         subscribed = [s for s in fake.asked("subscribe") if "phrase.heard" in s["events"]]
-        assert subscribed[-1]["phrases"] == sorted(["good morning", "morning everyone", "a notebook"])
+        assert subscribed[-1]["phrases"] == sorted(["good morning", "morning everyone", "a notebook", "stop english lesson"])
         assert any("touch" in s["events"] for s in fake.asked("subscribe"))
 
         async def learner():
@@ -464,3 +464,50 @@ def test_reset_forgets_one_lesson_or_all(tmp_path):
         assert Progress(path)._cards() == {}
     finally:
         del os.environ["LAMP_LEARN_HOME"]
+
+
+async def test_stroking_the_head_or_the_stop_phrase_ends_the_lesson(tmp_path):
+    from lamp_learn.coach import STOP_PHRASE
+
+    for stop in ("pet", "phrase"):
+        lesson = tiny()
+        progress = Progress(tmp_path / f"{stop}.json")
+        async with FakeLamp(grants="all") as fake:
+            lamp = await fake.connect()
+            session = await Session.open(lamp, lesson, progress=progress, listen_s=2.0, tries=2, language="en")
+            assert STOP_PHRASE in [p for s in fake.asked("subscribe") for p in s.get("phrases", [])]
+
+            async def learner():
+                await asyncio.sleep(0.3)
+                if stop == "pet":
+                    await fake.emit("touch", kind="pet")
+                else:
+                    await fake.emit("phrase.heard", phrase=STOP_PHRASE)
+
+            task = asyncio.ensure_future(learner())
+            result = await asyncio.wait_for(session.run(), 5)
+            await task
+            assert result.stopped and result.items == []
+            assert fake.asked("say")[-1]["text"] == "Okay, we'll stop here."
+            assert progress._cards() == {}  # the item it stopped on isn't scored
+            await lamp.close()
+
+
+async def test_list_lessons_then_choose_one_by_name(tmp_path):
+    from lamp_learn.listen import choose_from_menu, menu
+
+    progress = Progress(tmp_path / "p.json")
+    line, choices = menu(progress, "list beginner lessons")
+    assert line.startswith("Beginner lessons: ") and "family lesson" in choices
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        task = asyncio.ensure_future(choose_from_menu(lamp, line, choices, wait_s=3))
+        for _ in range(50):
+            if fake.asked("say"):
+                break
+            await asyncio.sleep(0.05)
+        await fake.emit("phrase.heard", phrase="family lesson")
+        found = await asyncio.wait_for(task, 5)
+        assert found.id == "en-a1-family"
+        assert await choose_from_menu(lamp, line, choices, wait_s=0.2) is None
+        await lamp.close()

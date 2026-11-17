@@ -1,6 +1,6 @@
 ---
 name: english-lesson
-description: Call when someone says "start my English lesson", "English lesson", "beginner/intermediate/advanced English lesson", "next English lesson", "new English lesson", "repeat English lesson", "English lesson again" or "English free talk". Their computer runs the lesson and speaks next; you only say it is starting. Never search for lessons or suggest other places to learn.
+description: Call when someone says "start my English lesson", "English lesson", "beginner/intermediate/advanced English lesson", "next English lesson", "new English lesson", "repeat English lesson", "English lesson again", "list English lessons", "list beginner/intermediate/advanced lessons", "stop English lesson", a lesson's name followed by "lesson" (such as "family lesson") or "English free talk". Their computer runs the lessons and speaks next; you only say "Okay." Never search for lessons or suggest other places to learn.
 ---
 
 # English lesson

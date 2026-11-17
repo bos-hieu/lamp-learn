@@ -87,7 +87,11 @@ python3 -m venv .venv
    | "beginner / intermediate / advanced English lesson" | the same, from A1-A2, B1-B2 or C1-C2 |
    | "next English lesson" / "new English lesson" | the next lesson not started yet, skipping reviews |
    | "repeat English lesson" / "English lesson again" | the last lesson practised, every item |
+   | "list English lessons" / "list beginner (intermediate, advanced) lessons" | the lamp says that level's lessons; then say one, like "family lesson" |
    | "English free talk" | a conversation with the lamp's own AI |
+
+   **Stop a lesson:** stroke the lamp's head, or say "stop English lesson". What
+   you finished is kept; the item it stopped on isn't scored.
 
    On first start it pushes its three skills to the lamp (`english-lesson`,
    `english-tutor`, `english-marks`, in `src/lamp_learn/skills/`). They show on the

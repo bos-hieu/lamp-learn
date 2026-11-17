@@ -37,6 +37,7 @@ WORDS = {
         "say_after_me": "Say after me: {phrase}",
         "again": "Once more: {phrase}",
         "repeat": "Again: {phrase}",
+        "stopped": "Okay, we'll stop here.",
         "right": ["Great!", "Well done!", "Perfect!", "Nice!"],
         "not_heard": "Let's hear it once more: {phrase}. We'll try it again later.",
         "new_word": "New words: {phrase}.",
@@ -50,6 +51,7 @@ WORDS = {
         "say_after_me": "Bạn hãy nói theo: {phrase}",
         "again": "Nói lại nhé: {phrase}",
         "repeat": "Nghe lại: {phrase}",
+        "stopped": "Được, mình dừng ở đây nhé.",
         "right": ["Giỏi lắm!", "Tốt lắm!", "Chính xác!", "Hay quá!"],
         "not_heard": "Nghe lại nhé: {phrase}. Lát nữa mình thử lại.",
         "new_word": "Từ mới: {phrase}.",
@@ -79,6 +81,7 @@ class ItemResult:
 class LessonResult:
     lesson: str
     items: list[ItemResult] = field(default_factory=list)
+    stopped: bool = False  # the learner stopped it
 
     @property
     def scored(self) -> int:
@@ -90,6 +93,14 @@ class LessonResult:
 
     def as_dict(self) -> dict:
         return {"lesson": self.lesson, "right": self.right, "scored": self.scored, "items": [r.as_dict() for r in self.items]}
+
+
+# Said during a lesson, it ends the lesson; so does stroking the lamp's head.
+STOP_PHRASE = "stop english lesson"
+
+
+class _Stopped(Exception):
+    pass
 
 
 class Session:
@@ -136,6 +147,7 @@ class Session:
         # A tap on the lamp's head while it listens says the phrase again.
         self.tap_repeat = tap_repeat
         self._heard: asyncio.Queue[tuple[str, str]] = asyncio.Queue()
+        self._stopped = False
         self._marks: list[str] = []  # each item's segment colour so far
 
     @classmethod
@@ -147,8 +159,12 @@ class Session:
     async def listen(self) -> None:
         """Register the lesson's phrases with the lamp, once. Raises the
         lamp's refusal, such as `no_grant` "not granted: hear"."""
-        if self.lesson.phrases:
-            await self.lamp.on("phrase.heard", self._on_phrase, phrases=self.lesson.phrases)
+        phrases = list(self.lesson.phrases)
+        # The stop phrase too, while the lamp's cap leaves room for it.
+        if phrases and STOP_PHRASE not in phrases and len(phrases) < 16:
+            phrases.append(STOP_PHRASE)
+        if phrases:
+            await self.lamp.on("phrase.heard", self._on_phrase, phrases=phrases)
         if self.tap_repeat:
             try:
                 await self.lamp.on("touch", self._on_touch)
@@ -177,11 +193,21 @@ class Session:
         phrase = event.get("phrase")
         if isinstance(phrase, str):
             self.log(f"heard: {phrase}")
+            if phrase.lower() == STOP_PHRASE:
+                self._stop()
+                return
             self._heard.put_nowait(("heard", phrase.lower()))
 
     def _on_touch(self, event: dict) -> None:
         if event.get("kind") == "tap":
             self._heard.put_nowait(("tap", "tap"))
+        elif event.get("kind") == "pet":
+            self.log("pet: stop")
+            self._stop()
+
+    def _stop(self) -> None:
+        self._stopped = True
+        self._heard.put_nowait(("stop", "stop"))
 
     async def _show_progress(self, current: int | None = None) -> None:
         """Draw the lesson round the ring: green right, orange missed, purple a
@@ -250,6 +276,8 @@ class Session:
     def _drain(self) -> None:
         while not self._heard.empty():
             self._heard.get_nowait()
+        if self._stopped:  # a stop while the lamp spoke still counts
+            self._heard.put_nowait(("stop", "stop"))
 
     async def _wait_for(self, phrases: list[str]) -> str:
         """`right` when a phrase is heard, `tap` on a tap on the head, else
@@ -261,8 +289,8 @@ class Session:
                 kind, heard = await asyncio.wait_for(self._heard.get(), timeout=left)
             except asyncio.TimeoutError:
                 return "timeout"
-            if kind == "tap":
-                return "tap"
+            if kind in ("tap", "stop"):
+                return kind
             if heard in wanted:
                 return "right"
         return "timeout"
@@ -285,13 +313,15 @@ class Session:
             result.tries = attempt
             self.log(f"listen: {' | '.join(item.phrases)}")
             outcome = await self._wait_for(item.phrases)
-            while outcome == "tap" and repeats < self.MOST_REPEATS:
+            while outcome == "tap" and repeats < self.MOST_REPEATS and not self._stopped:
                 repeats += 1
                 self.log("tap: repeat")
                 await self.say(self._word("repeat", phrase=item.phrase))
                 self._drain()
                 self.log(f"listen: {' | '.join(item.phrases)}")
                 outcome = await self._wait_for(item.phrases)
+            if outcome == "stop" or self._stopped:
+                raise _Stopped
             if outcome == "right":
                 result.right = True
                 await self._cheer(True)
@@ -360,10 +390,20 @@ class Session:
         await self._show_progress(0)
         await self.say(self.lesson.intro or self._word("start", title=self.lesson.title))
         for n, item in enumerate(items):
+            if self._stopped:
+                break
             await self._show_progress(n)
-            done = await self.run_item(item)
+            try:
+                done = await self.run_item(item)
+            except _Stopped:
+                break
             result.items.append(done)
             self._marks.append({True: "#22c55e", False: "#f59e0b", None: "#8b5cf6"}[done.right])
+        if self._stopped:
+            # The item it stopped on isn't scored; the ones done are kept.
+            result.stopped = True
+            await self.say(self._word("stopped"))
+            return result
         await self._show_progress()
         if result.scored:
             await self.say(self._word("done", right=result.right, scored=result.scored))

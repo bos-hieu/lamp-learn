@@ -3,11 +3,11 @@
 # its tool when someone says it. No trigger, no [ask]: a person asked.
 needs = ["voice"]
 kind = "installable"
-version = "0.1.2"
+version = "0.1.3"
 tool = "start_english_lesson"
 
 [permissions]
 speak = true
 
 [[do]]
-say = "Say only, in a few words: 'Okay, your English lesson is starting.' Nothing more: the learner's computer runs the lesson and speaks next."
+say = "Say only: 'Okay.' Nothing more: the learner's computer runs the lessons and speaks next."
