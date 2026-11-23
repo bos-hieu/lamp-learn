@@ -3,40 +3,42 @@ title = "Greetings"
 target = "en"
 level = "A1"
 intro = "Let's practise saying hello in English."
+intro_hint = { vi = "Hôm nay mình tập chào hỏi bằng tiếng Anh. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は英語のあいさつを練習しましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们练习用英语打招呼。我说一句英语，你跟着我说。", ko = "오늘은 영어로 인사하는 연습을 해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "good-morning"
 kind = "repeat"
 phrase = "good morning"
-hint = { vi = "chào buổi sáng" }
+hint = { vi = "chào buổi sáng", ja = "おはようございます", zh = "早上好", ko = "좋은 아침이에요" }
 
 [[items]]
 id = "how-are-you"
 kind = "repeat"
 phrase = "how are you today"
 accept = ["how are you"]
-hint = { vi = "hôm nay bạn thế nào" }
+hint = { vi = "hôm nay bạn thế nào", ja = "今日の調子はどうですか", zh = "你今天怎么样", ko = "오늘 어떻게 지내요" }
 
 [[items]]
 id = "fine-thanks"
 kind = "repeat"
 phrase = "i am fine thank you"
 accept = ["im fine thank you", "fine thank you"]
-hint = { vi = "tôi khỏe, cảm ơn" }
+hint = { vi = "tôi khỏe, cảm ơn", ja = "元気です、ありがとう", zh = "我很好，谢谢", ko = "잘 지내요, 고마워요" }
 
 [[items]]
 id = "nice-to-meet"
 kind = "repeat"
 phrase = "nice to meet you"
-hint = { vi = "rất vui được gặp bạn" }
+hint = { vi = "rất vui được gặp bạn", ja = "はじめまして、よろしくお願いします", zh = "很高兴认识你", ko = "만나서 반가워요" }
 
 [[items]]
 id = "see-you"
 kind = "repeat"
 phrase = "see you tomorrow"
-hint = { vi = "hẹn gặp lại ngày mai" }
+hint = { vi = "hẹn gặp lại ngày mai", ja = "また明日", zh = "明天见", ko = "내일 만나요" }
 
 [[items]]
 id = "talk-intro"
 kind = "talk"
-prompt = "Hi! Tell me your name and how you are today, in English."
+prompt = "Hi! How are you today, and what did you do this morning? Answer in English."
+hint = { vi = "Bây giờ mình hỏi bạn khỏe không và sáng nay bạn đã làm gì. Bạn trả lời bằng tiếng Anh nhé, ví dụ: I am fine. I had breakfast.", ja = "今から、元気かどうかと、今朝何をしたかを聞きます。英語で答えてくださいね。例えば: I am fine. I had breakfast.", zh = "现在我问你身体好不好，还有今天早上做了什么。请用英语回答，例如: I am fine. I had breakfast.", ko = "이제 잘 지내는지, 오늘 아침에 뭘 했는지 물어볼게요. 영어로 대답해 주세요. 예를 들면: I am fine. I had breakfast." }

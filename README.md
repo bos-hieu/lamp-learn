@@ -1,5 +1,7 @@
 # lamp-learn: language lessons on a lampOS lamp
 
+An English tutor on your lamp: short spoken lessons from A1 to C2, and free talk practice.
+
 A small SDK on top of the lampOS SDK (`lampos`, Python) that turns the lamp into
 a language coach. It is generic (each lesson names its `target` language), and
 ships with English lessons first. Two ways in:
@@ -34,7 +36,8 @@ the program's registered phrases it heard. So:
 - the lamp matches a phrase as a run of whole words in a finished line, so
   "good morning" is heard inside "oh, good morning lamp". Use short phrases of
   common words, and add the ways a recognizer may write it in `accept`
-  ("i wake up at 7" for "i wake up at seven").
+  ("i have 2 sisters" for "i have two sisters"). Avoid clock times: the
+  lamp writes "seven o'clock" as "7:00", which no phrase can match.
 
 ## Install
 
@@ -88,15 +91,61 @@ python3 -m venv .venv
    | "next English lesson" | the next lesson not started yet, skipping reviews |
    | "repeat English lesson" | the last lesson practised, every item |
    | "list English lessons" / "list beginner (intermediate, advanced) lessons" | the lamp says that level's lessons; then say one within 30 s, like "family lesson" (on a Mac the list also shows as a notification) |
-   | "start family lesson" (with `--levels`) | that lesson by name: as many lessons as fit in the lamp's 16 phrases |
-   | "English free talk" | a conversation with the lamp's own AI |
+   | "English lesson about family" (with `--levels`) | that lesson by topic: as many lessons as fit in the lamp's 16 phrases |
+   | "English conversation" | a conversation with the lamp's own AI |
 
    **Stop a lesson:** stroke the lamp's head, or say "stop English lesson". What
-   you finished is kept; the item it stopped on isn't scored.
+   you finished is kept; the item it stopped on isn't scored. If nobody speaks
+   for two items in a row, it stops by itself ("I can't hear you right
+   now…"). A learner who speaks but says something else hears "Not quite.
+   Listen again: …" and the lesson goes on.
+   Stuck on a line, say "what does it mean" (or "what does that mean"): the
+   coach says what it means, in the learner's language when the lesson has a
+   hint in it, and asks for it again without using a try.
+
+   **During a lesson:**
+   - Before the first line, after each practice talk and before the lesson
+     list, lamp-learn closes the lamp's open conversation (a short mute, once
+     the lamp has stopped talking). Your answers then go to the lesson only;
+     the lamp's own voice doesn't answer "can I try this on?" as well. After
+     you ask the lamp something by name mid-lesson, it closes it again before
+     the next try.
+   - A near miss gets a hint and another try: "I would take it" for "I will
+     take it" gives "Close! Say: I will take it". Items list their own near
+     misses as `close = [...]`; "would" for "will" is added for you.
+   - Said just after the coach moved on ("Let's hear it once more: …"), a
+     right answer still counts, within 6 s.
+   - For a beginner, run listening mode with `--language vi`: the coach speaks
+     Vietnamese, and the A1–A2 lessons explain themselves in it. You hear the
+     lesson's intro, what each line means ("Câu này nghĩa là: chào buổi
+     sáng.") before "Bạn hãy nói theo: good morning", and before a practice
+     talk, what to talk about with an example answer. `--language ja`, `zh`
+     (Simplified Chinese) and `ko` work the same way for the A1–A2 lessons.
 
    On first start it pushes its skill, English Tutor (`src/lamp_learn/skills/english-tutor`),
    to the lamp, where it shows on the Skills page in the app. Its tutor works on
    its own ("let's practise English"); its lesson step hands lessons to lamp-learn.
+
+### Test it by voice on a real lamp
+
+The computer plays the learner out loud (macOS `say`), next to the lamp with
+its sound up, and reads listening mode's log:
+
+```
+lamp-learn listen --levels A1 A2 --log-file /tmp/lamp-learn.log   # one window
+lamp-learn autotest --log /tmp/lamp-learn.log                     # another
+
+lamp-learn autotest --suite levels --log /tmp/lamp-learn.log     # listening mode with no --levels
+lamp-learn autotest --suite freetalk --log /tmp/lamp-learn.log   # any listening mode
+lamp-learn autotest --suite fuzz --log /tmp/lamp-learn.log       # any listening mode
+```
+
+- **basic:** a lesson by name (one answer wrong on purpose), the list, stop by voice, next, repeat and today's lesson.
+- **levels:** every level's list, a lesson chosen by name and answered to its end, and the level's own lesson.
+- **freetalk:** "English conversation", two lines that each get a reply, then a quiet end.
+- **fuzz:** off-script speech in a seeded random order: chatter starts nothing, a list answered with silence or a lesson not on it chooses nothing, silence and talk over the lamp in a lesson. `tests/test_fuzz.py` fuzzes the same choices without a lamp (every level setting, damaged progress files).
+
+A lesson cut off by a dropped connection goes on from where it stopped.
 
 ## Try it with no lamp
 
@@ -175,6 +224,7 @@ title = "Greetings"
 target = "en"                 # the language learned
 level = "A1"
 intro = "Let's practise saying hello in English."   # optional
+intro_hint = { vi = "Hôm nay mình tập chào hỏi bằng tiếng Anh. …" }   # said instead, in the learner's language
 
 [[items]]
 id = "how-are-you"
@@ -193,11 +243,12 @@ example = "I write my homework in a notebook."
 [[items]]
 id = "talk-intro"
 kind = "talk"                 # the lamp's model talks with the learner; not scored
-prompt = "Tell me your name and how you are today, in English."
+prompt = "How are you today, and what did you do this morning? Answer in English."
+hint = { vi = "Bây giờ mình hỏi bạn khỏe không … ví dụ: I am fine." }   # said first, in the learner's language
 ```
 
-The coach's own lines exist in English and Vietnamese (`coach.WORDS`). Add a
-language there to coach in it. The learner's language defaults to the lamp
+The coach's own lines exist in English, Vietnamese, Japanese, Chinese and
+Korean (`coach.WORDS`). Add a language there to coach in it. The learner's language defaults to the lamp
 owner's (`lamp.language`).
 
 ## Library

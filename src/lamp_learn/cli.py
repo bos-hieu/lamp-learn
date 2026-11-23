@@ -16,6 +16,7 @@ import argparse
 import asyncio
 import json
 import sys
+import time
 
 from . import lesson as lessons
 from .coach import Session
@@ -151,6 +152,15 @@ async def _listen(args) -> int:
 
     from .listen import serve
 
+    log = _print
+    if args.log_file:
+        sink = open(args.log_file, "a", encoding="utf-8", buffering=1)
+
+        def log(line: str) -> None:
+            _print(line)
+            # Each line with its time, for finding what took long.
+            sink.write(time.strftime("%H:%M:%S") + f".{int(time.time() * 1000) % 1000:03d} " + line + "\n")
+
     await serve(
         lambda: Lamp.connect(args.lamp, host=args.host),
         progress=Progress(learner=args.learner),
@@ -158,7 +168,7 @@ async def _listen(args) -> int:
         language=args.language,
         listen_s=args.listen,
         talk_level=args.talk_level,
-        log=_print,
+        log=log,
         show=None if args.no_notify else _notify,
     )
     return 0
@@ -182,6 +192,20 @@ def _progress(args) -> int:
     for row in progress.report(list(lessons.builtin().values())):
         _print(f"{row['lesson']:24} seen {row['seen']}/{row['items']}  mastered {row['mastered']}  due {row['due']}  right {row['right']}  wrong {row['wrong']}")
     return 0
+
+
+def _autotest(args) -> int:
+    from . import autotest
+
+    if args.suite == "fuzz":
+        report = autotest.scenario_fuzz(args.log, voice=args.voice, pause=args.pause)
+    elif args.suite == "freetalk":
+        report = autotest.scenario_freetalk(args.log, voice=args.voice, pause=args.pause)
+    elif args.suite == "levels":
+        report = autotest.scenario_levels(args.log, voice=args.voice, pause=args.pause)
+    else:
+        report = autotest.scenario(args.log, voice=args.voice, pause=args.pause)
+    return 0 if report.passed == len(report.steps) else 1
 
 
 def _reset(args) -> int:
@@ -249,10 +273,11 @@ def main(argv: list[str] | None = None) -> int:
 
     listen = commands.add_parser("listen", help='wait for "start my English lesson" said to the lamp, then run today\'s lesson')
     listen.add_argument("--levels", nargs="*", help="only lessons at these levels, e.g. A1 A2")
-    listen.add_argument("--language", help="the coach's language for meanings (en, vi)")
+    listen.add_argument("--language", help="the coach's language for meanings (en, vi, ja, zh, ko)")
     listen.add_argument("--listen", type=float, default=15, help="seconds to wait for each answer (default 15)")
-    listen.add_argument("--talk-level", default="B1", help='the level for "English free talk" (default B1)')
+    listen.add_argument("--talk-level", default=None, help='the level for "English conversation" (default: the last lesson\'s level, else the highest of --levels, else B1)')
     listen.add_argument("--learner", default="default")
+    listen.add_argument("--log-file", help="also write the log here (for `lamp-learn autotest`)")
     listen.add_argument("--no-notify", action="store_true", help="don't show the lesson list as a notification (macOS)")
     listen.add_argument("--lamp")
     listen.add_argument("--host")
@@ -280,6 +305,13 @@ def main(argv: list[str] | None = None) -> int:
     prog = commands.add_parser("progress", help="the learner's score per lesson")
     prog.add_argument("--learner", default="default")
     prog.set_defaults(run=_progress)
+
+    autotest = commands.add_parser("autotest", help="a voice test on a real lamp: this computer speaks the learner's lines out loud")
+    autotest.add_argument("--log", required=True, help="listening mode's --log-file")
+    autotest.add_argument("--voice", help="the text-to-speech voice (macOS: say -v '?' lists them)")
+    autotest.add_argument("--pause", type=float, default=1.5, help="seconds to wait after the lamp asks before answering (1.5)")
+    autotest.add_argument("--suite", choices=["basic", "levels", "freetalk", "fuzz"], default="basic", help="basic: listening mode with --levels A1 A2; levels: every level, listening mode with no --levels; freetalk: English conversation, any listening mode; fuzz: off-script speech, any listening mode")
+    autotest.set_defaults(run=_autotest)
 
     reset = commands.add_parser("reset", help="forget the learner's score, for some lessons or all")
     reset.add_argument("lessons", nargs="*", help="lesson ids (default: every lesson)")

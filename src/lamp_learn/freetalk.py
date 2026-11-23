@@ -18,18 +18,19 @@ turn's words stay on the lamp). So free talk is not scored; the drills are.
 
 from __future__ import annotations
 
+import asyncio
 import time
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
 from typing import Callable
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # Python 3.10
-    import tomli as tomllib
+import tomllib
 
 SKILLS = ("english-tutor",)
+# Set by the Store app (`lamp_learn.app`): the lamp's installer puts the
+# companion skill in place with the app, so nothing is pushed from here.
+SKILLS_MANAGED = False
 # Skills lamp-learn pushed before, taken off the lamp when English Tutor goes
 # on: the marks and the lesson hand-off (now its good, fix and lesson steps)
 # and "english", its name for a day. (english-tutor 0.1 is replaced in place.)
@@ -38,6 +39,17 @@ OLD_SKILLS = ("english-marks", "english-lesson", "english")
 # A turn with no opening line that ends "finished" faster than this answered
 # no one: a person's line and the model's answer take longer.
 NO_MODEL_S = 1.5
+# A turn the lamp drops as "not answered" has caught a sound it didn't take
+# as the learner's (often the tail of its own reply): listen again, at most
+# this many times in a row, rather than end the talk.
+MOST_RELISTENS = 2
+NOT_ANSWERED = "not answered"
+# The lamp refuses a turn while it counts a conversation as going on (45 s
+# after its own voice answered someone, e.g. "English conversation" itself):
+# try the opening again this often, for this long.
+CONVERSATION = "a conversation is going on"
+RETRY_OPEN_S = 5.0
+RETRY_OPEN_FOR_S = 50.0
 
 # The lamp takes one skill push each 10 s.
 PUSH_GAP_S = 10.5
@@ -93,6 +105,8 @@ async def install(lamp, log: Callable[[str], None] = lambda line: None) -> list[
     "not granted: skills", or "skill push is not on this lamp")."""
     import asyncio
 
+    if SKILLS_MANAGED:
+        return []
     kept = {s["name"]: s for s in await lamp.skills()}
     pushed = []
     for name in SKILLS:
@@ -132,9 +146,24 @@ async def free_talk(
     log(f"turn: {line}")
     done = await lamp.start_turn(line, wait=True)
     how, why = _how(done)
+    waited = 0.0
+    while CONVERSATION in why and waited < RETRY_OPEN_FOR_S:
+        log(f"turn: the lamp is still talking with you; trying again in {RETRY_OPEN_S:.0f} s")
+        await asyncio.sleep(RETRY_OPEN_S)
+        waited += RETRY_OPEN_S
+        done = await lamp.start_turn(line, wait=True)
+        how, why = _how(done)
     turns = 1
-    while how == "finished" and turns < most_turns:
-        log("turn: (listening for your next line)")
+    relistens = 0
+    while turns < most_turns:
+        if how == "dropped" and why == NOT_ANSWERED and relistens < MOST_RELISTENS:
+            relistens += 1
+            log("turn: (the lamp caught a sound, not your line: listening again)")
+        elif how == "finished":
+            relistens = 0
+            log("turn: (listening for your next line)")
+        else:
+            break
         began = time.monotonic()
         done = await lamp.start_turn(None, wait=True)
         how, why = _how(done)
@@ -150,4 +179,7 @@ async def free_talk(
 def _how(done) -> tuple[str, str]:
     if not isinstance(done, dict):
         return "", ""
-    return str(done.get("how", "")), str(done.get("why", done.get("reason", "")) or "")
+    how = str(done.get("how", ""))
+    why = str(done.get("why", done.get("reason", "")) or "")
+    # The lamp's reason may repeat the how ("dropped: nobody spoke").
+    return how, why.removeprefix(how + ": ") if how else why

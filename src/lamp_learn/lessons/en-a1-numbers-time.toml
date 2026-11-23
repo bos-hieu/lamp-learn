@@ -3,19 +3,22 @@ title = "Numbers and time"
 target = "en"
 level = "A1"
 intro = "Let's practise numbers and telling the time."
+intro_hint = { vi = "Hôm nay mình tập nói số và giờ. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は数字と時間の言い方を練習しましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们练习说数字和时间。我说一句英语，你跟着我说。", ko = "오늘은 숫자와 시간을 말하는 연습을 해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "what-time"
 kind = "repeat"
 phrase = "what time is it"
-hint = { vi = "mấy giờ rồi" }
+hint = { vi = "mấy giờ rồi", ja = "今何時ですか", zh = "现在几点了", ko = "지금 몇 시예요" }
 
 [[items]]
-id = "three-oclock"
+id = "quarter-past"
 kind = "repeat"
-phrase = "it is three oclock"
-accept = ["its three oclock", "it is 3 oclock", "its 3 oclock", "three oclock"]
-hint = { vi = "bây giờ là ba giờ" }
+# Not "three o'clock": the lamp's recognizer writes it "03:00", which a
+# phrase can't hold (8 letters at least). Words it keeps as words.
+phrase = "it is quarter past three"
+accept = ["its quarter past three", "quarter past three", "its quarter past 3", "quarter past 3"]
+hint = { vi = "bây giờ là ba giờ mười lăm", ja = "今は三時十五分です", zh = "现在是三点一刻", ko = "지금은 세 시 십오 분이에요" }
 
 [[items]]
 id = "half-past"
@@ -24,22 +27,23 @@ phrase = "half past seven"
 accept = ["half past 7"]
 meaning = "thirty minutes after seven"
 example = "I eat breakfast at half past seven."
-hint = { vi = "bảy giờ rưỡi" }
+hint = { vi = "bảy giờ rưỡi", ja = "七時半", zh = "七点半", ko = "일곱 시 반" }
 
 [[items]]
 id = "how-old"
 kind = "repeat"
 phrase = "how old are you"
-hint = { vi = "bạn bao nhiêu tuổi" }
+hint = { vi = "bạn bao nhiêu tuổi", ja = "あなたは何歳ですか", zh = "你多大了", ko = "몇 살이에요" }
 
 [[items]]
 id = "twenty-years"
 kind = "repeat"
 phrase = "i am twenty years old"
 accept = ["im twenty years old", "i am 20 years old", "im 20 years old", "twenty years old"]
-hint = { vi = "tôi hai mươi tuổi" }
+hint = { vi = "tôi hai mươi tuổi", ja = "私は二十歳です", zh = "我二十岁", ko = "저는 스무 살이에요" }
 
 [[items]]
 id = "talk-time"
 kind = "talk"
 prompt = "What time do you get up, and what time do you go to bed?"
+hint = { vi = "Bây giờ bạn kể bạn thức dậy lúc mấy giờ và đi ngủ lúc mấy giờ. Ví dụ: I get up at six.", ja = "では、何時に起きて、何時に寝るかを話してください。例えば: I get up at six.", zh = "现在说说你几点起床，几点睡觉。例如: I get up at six.", ko = "이제 몇 시에 일어나고 몇 시에 자는지 말해 보세요. 예를 들면: I get up at six." }

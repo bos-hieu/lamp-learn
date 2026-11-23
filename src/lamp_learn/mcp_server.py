@@ -139,10 +139,7 @@ def build(link: Link) -> FastMCP:
     @server.tool()
     async def check_lesson(toml: str) -> dict:
         """Check a lesson written as TOML against the lamp's limits, without saving it."""
-        try:
-            import tomllib
-        except ImportError:  # pragma: no cover
-            import tomli as tomllib
+        import tomllib
         try:
             found = lessons.parse(tomllib.loads(toml))
         except (LessonError, tomllib.TOMLDecodeError) as error:

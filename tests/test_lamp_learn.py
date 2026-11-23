@@ -87,7 +87,7 @@ async def test_drill_right_when_phrase_heard(tmp_path):
         lamp = await fake.connect()
         session = await Session.open(lamp, lesson, listen_s=1.0, progress=Progress(tmp_path / "p.json"), language="en")
         subscribed = [s for s in fake.asked("subscribe") if "phrase.heard" in s["events"]]
-        assert subscribed[-1]["phrases"] == sorted(["good morning", "morning everyone", "a notebook", "stop english lesson"])
+        assert subscribed[-1]["phrases"] == sorted(["good morning", "morning everyone", "a notebook", "stop english lesson", "what does it mean", "what does that mean"])
         assert any("touch" in s["events"] for s in fake.asked("subscribe"))
 
         async def learner():
@@ -138,11 +138,49 @@ async def test_word_item_teaches_in_learners_language():
         await lamp.close()
 
 
+def test_beginner_lessons_have_ja_zh_ko_hints():
+    from lamp_learn.coach import WORDS
+    for language in ("ja", "zh", "ko"):
+        assert set(WORDS[language]) == set(WORDS["vi"]), language
+        assert len(WORDS[language]["right"]) == 4
+    beginner = [found for found in builtin().values() if found.level in ("A1", "A2")]
+    assert len(beginner) == 9
+    for found in beginner:
+        for language in ("ja", "zh", "ko"):
+            assert found.intro_hint.get(language), (found.id, language)
+            for item in found.items:
+                if item.hint:
+                    assert item.hint.get(language), (found.id, item.id, language)
+
+
+async def test_beginner_hears_meanings_in_their_language():
+    from lamp_learn.lesson import find
+    lesson = find("en-a1-greetings")
+    assert lesson.intro_hint["vi"].startswith("Hôm nay")
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.2, tries=1, language="vi", close_talk=False)
+        await session.run_item(lesson.item("good-morning"))
+        texts = [r["text"] for r in fake.asked("say")]
+        assert texts[:2] == ["Câu này nghĩa là: chào buổi sáng.", "Bạn hãy nói theo: good morning"]
+        await session.run_item(lesson.item("talk-intro"))
+        texts = [r["text"] for r in fake.asked("say")]
+        assert texts[-1] == lesson.item("talk-intro").hint["vi"]
+        await lamp.close()
+    # In English nothing extra is said.
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.2, tries=1, language="en", close_talk=False)
+        await session.run_item(lesson.item("good-morning"))
+        assert fake.asked("say")[0]["text"] == "Say after me: good morning"
+        await lamp.close()
+
+
 async def test_talk_is_a_turn_not_scored():
     lesson = tiny()
     async with FakeLamp(grants="all") as fake:
         lamp = await fake.connect()
-        session = await Session.open(lamp, lesson, language="en")
+        session = await Session.open(lamp, lesson, language="en", close_talk=False)
         result = await session.run_item(lesson.item("c"))
         assert result.right is None and result.how == "finished"
         # The prompt, then the turns that keep the talk going (3 at most).
@@ -178,7 +216,7 @@ async def test_talk_wait_replaces_more_turns():
 
     async with FakeLamp(grants="all") as fake:
         lamp = await fake.connect()
-        session = await Session.open(lamp, lesson, language="en", talk_wait=wait)
+        session = await Session.open(lamp, lesson, language="en", talk_wait=wait, close_talk=False)
         result = await session.run_item(lesson.item("c"))
         assert waited == ["c"] and len(fake.asked("turn.start")) == 1 and result.tries == 1
         await lamp.close()
@@ -541,9 +579,9 @@ def test_limited_levels_make_room_for_lessons_by_name():
     from lamp_learn.listen import wake_phrases
 
     phrases, direct = wake_phrases(("A1", "A2"))
-    assert len(phrases) <= 16 and "family lesson" in direct and "family lesson" in phrases
+    assert len(phrases) <= 16 and "lesson about family" in direct and "lesson about family" in phrases
     assert "list advanced lessons" not in phrases and "list english lessons" in phrases
-    assert direct["family lesson"].id == "en-a1-family"
+    assert direct["lesson about family"].id == "en-a1-family"
     assert wake_phrases(None)[1] == {}
 
 
@@ -562,4 +600,278 @@ async def test_install_takes_the_old_three_skills_off(tmp_path, monkeypatch):
         await freetalk.install(lamp)
         names = {s["name"] for s in await lamp.skills()}
         assert "english-tutor" in names and "english-marks" not in names
+        await lamp.close()
+
+
+def test_autotest_answers_a_lesson_and_misses_on_purpose(tmp_path):
+    from lamp_learn import autotest
+
+    path = tmp_path / "listen.log"
+    path.write_text("")
+    log = autotest.Log(str(path))
+    script = iter(["listen: good morning", "listen: a notebook", "listen: see you later"])
+
+    def write(*lines):
+        with open(path, "a") as f:
+            f.write("".join(l + "\n" for l in lines))
+
+    write(next(script))
+    said = []
+
+    def say(line):
+        said.append(line)
+        if line == autotest.WRONG:
+            write("say: Once more: a notebook", "listen: a notebook") if said.count(autotest.WRONG) == 1 else write("feedback: missed", next(script))
+        else:
+            nxt = next(script, None)
+            write("feedback: right", *( [nxt] if nxt else ["lesson done: 2 of 3 right"]))
+
+    report = autotest.Report()
+    autotest.run_lesson(log, say, report, wrong_at=2, answer_pause=0, out=lambda line: None)
+    assert said == ["good morning", autotest.WRONG, autotest.WRONG, "see you later"]
+    assert [s.ok for s in report.steps] == [True, True, True, True]
+    assert report.steps[1].name == "item 2 answered wrong is missed"
+
+
+async def test_phrase_budget_waits_past_six_changes_a_minute(monkeypatch):
+    from lamp_learn.listen import PhraseBudget
+
+    waited = []
+
+    async def fake_sleep(s):
+        waited.append(s)
+
+    monkeypatch.setattr("lamp_learn.listen.asyncio.sleep", fake_sleep)
+    budget = PhraseBudget()
+    for n in range(5):
+        await budget.spend([f"phrase number {n}"])
+    await budget.spend(["phrase number 4"])  # the same set again is free
+    assert waited == []
+    await budget.spend(["phrase number 9"])
+    assert len(waited) == 1 and 55 < waited[0] <= 61
+
+
+async def test_a_lesson_that_hears_nothing_sends_its_phrases_again():
+    lesson = tiny()
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.2, tries=1, language="en")
+        before = len([s for s in fake.asked("subscribe") if s.get("phrases")])
+        await session.drill(lesson.item("a"))  # nobody answers
+        after = len([s for s in fake.asked("subscribe") if s.get("phrases")])
+        assert after == before + 1 and fake.asked("unsubscribe")
+        await session.drill(lesson.item("a"))  # once a lesson only
+        assert len([s for s in fake.asked("subscribe") if s.get("phrases")]) == after
+        await lamp.close()
+
+
+async def test_a_lesson_cut_off_by_a_dropped_connection_goes_on(monkeypatch):
+    from lamp_learn import listen
+    from lamp_learn.coach import ItemResult, LessonResult
+
+    lesson = tiny()
+    runs = []
+
+    class FakeSession:
+        def __init__(self, n):
+            self.n, self.planned, self.result = n, None, None
+
+        async def say(self, text):
+            runs.append(("say", text))
+
+        def _word(self, key, **_):
+            return key
+
+        async def run(self, item_ids=None, *, due_only=False, intro=True):
+            runs.append(("run", item_ids, intro))
+            self.planned = list(lesson.items)
+            self.result = LessonResult(lesson.id)
+            if self.n == 0:
+                self.result.items.append(ItemResult(lesson.items[0].id, "say", True))
+                raise ConnectionError("closed")
+            return LessonResult(lesson.id, [ItemResult(i, "say", True) for i in item_ids])
+
+    opened = []
+
+    async def fake_open(lamp, found, **_):
+        opened.append(1)
+        return FakeSession(len(opened) - 1)
+
+    class Conn:
+        async def __aenter__(self):
+            return object()
+
+        async def __aexit__(self, *a):
+            return False
+
+    async def fake_connect(connect):
+        return Conn()
+
+    monkeypatch.setattr(listen.Session, "open", staticmethod(fake_open))
+    monkeypatch.setattr(listen, "_connect", fake_connect)
+    real_sleep = asyncio.sleep
+    monkeypatch.setattr(listen.asyncio, "sleep", lambda s: real_sleep(0))
+    logs = []
+    whole = await listen.run_lesson(None, lesson, False, progress=None, language="en", listen_s=1, log=logs.append)
+    rest = [i.id for i in lesson.items[1:]]
+    assert runs[0] == ("run", None, True)
+    assert ("say", "resumed") in runs and runs[-1] == ("run", rest, False)
+    assert [r.item for r in whole.items] == [lesson.items[0].id] + rest
+    assert any("dropped in the lesson" in line for line in logs)
+
+
+async def test_free_talk_listens_again_after_a_turn_not_answered(monkeypatch):
+    import lamp_learn.freetalk as freetalk
+
+    async def no_install(lamp, log):
+        return None
+
+    monkeypatch.setattr(freetalk, "install", no_install)
+    monkeypatch.setattr(freetalk, "NO_MODEL_S", 0)
+    outcomes = iter([
+        {"how": "finished"},
+        {"how": "dropped", "why": "not answered"},  # a stray sound
+        {"how": "finished"},  # the learner's line, answered
+        {"how": "dropped", "why": "not answered"},
+        {"how": "dropped", "why": "not answered"},
+        {"how": "dropped", "why": "not answered"},  # a third in a row ends it
+    ])
+
+    class Lamp:
+        async def start_turn(self, line, wait=True):
+            return next(outcomes)
+
+    logs = []
+    result = await freetalk.free_talk(Lamp(), log=logs.append)
+    assert result.turns == 6 and result.how == "dropped"
+    assert sum("listening again" in line for line in logs) == 3
+
+
+async def test_free_talk_tries_the_opening_again_while_a_conversation_goes_on(monkeypatch):
+    import lamp_learn.freetalk as freetalk
+
+    async def no_install(lamp, log):
+        return None
+
+    monkeypatch.setattr(freetalk, "install", no_install)
+    monkeypatch.setattr(freetalk, "NO_MODEL_S", 0)
+    monkeypatch.setattr(freetalk, "RETRY_OPEN_S", 0)
+    outcomes = iter([
+        {"how": "dropped", "why": "refused: a conversation is going on"},
+        {"how": "dropped", "why": "refused: a conversation is going on"},
+        {"how": "finished"},
+        {"how": "dropped", "why": "nobody spoke"},
+    ])
+    prompts = []
+
+    class Lamp:
+        async def start_turn(self, line, wait=True):
+            prompts.append(line)
+            return next(outcomes)
+
+    result = await freetalk.free_talk(Lamp())
+    assert prompts[:3] == [prompts[0]] * 3 and prompts[0] and prompts[3] is None
+    assert result.how == "dropped" and result.why == "nobody spoke"
+
+
+def test_near_misses_and_phrase_cap():
+    from lamp_learn import lesson as lessons
+    from lamp_learn.coach import PHRASES_MOST, Session
+
+    every = lessons.builtin()
+    item = next(i for i in every["en-a2-shopping"].items if i.id == "ill-take-it")
+    assert item.near_misses == ["i would take it", "i would take this"]
+    assert "i would take it" in Session.phrases_for(every["en-a2-shopping"])
+    for found in every.values():
+        phrases = Session.phrases_for(found)
+        assert len(phrases) <= PHRASES_MOST and len(set(phrases)) == len(phrases)
+
+
+async def test_lesson_closes_the_conversation_first():
+    lesson = tiny()
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, language="en")
+        await session._close_conversation()
+        sets = [r for r in fake.requests if r["op"] == "listen.set"]
+        assert [r.get("on") for r in sets] == [False, True]
+        await lamp.close()
+
+
+def three_items():
+    return tiny(items=[
+        {"id": "a", "kind": "repeat", "phrase": "good morning"},
+        {"id": "b", "kind": "repeat", "phrase": "see you tomorrow"},
+        {"id": "c", "kind": "repeat", "phrase": "nice to meet you"},
+    ])
+
+
+async def test_a_silent_learner_ends_the_lesson_after_two_items():
+    lesson = three_items()
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.2, tries=2, language="en", close_talk=False)
+        result = await session.run()
+        texts = [r["text"] for r in fake.asked("say")]
+        assert result.stopped and len(result.items) == 2
+        assert texts[-1].startswith("I can't hear you")
+        await lamp.close()
+
+
+async def test_a_learner_who_speaks_but_is_wrong_is_not_stopped():
+    lesson = three_items()
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.3, tries=2, language="en", close_talk=False)
+        running = asyncio.create_task(session.run())
+
+        async def speak_wrong():
+            # The learner talks (something else) whenever the coach listens.
+            while not running.done():
+                if session._listening:
+                    await fake.emit("lamp.changed", lamp_state={"talking": True})
+                await asyncio.sleep(0.05)
+
+        talker = asyncio.create_task(speak_wrong())
+        result = await running
+        talker.cancel()
+        texts = [r["text"] for r in fake.asked("say")]
+        assert not result.stopped and len(result.items) == 3 and result.right == 0
+        assert "Not quite. Listen again: good morning" in texts
+        assert not any(t.startswith("I can't hear you") for t in texts)
+        await lamp.close()
+
+
+async def test_what_does_it_mean_explains_without_using_a_try():
+    from lamp_learn.lesson import find
+    lesson = find("en-a1-greetings")
+    assert "what does it mean" in Session.phrases_for(lesson)
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.5, tries=1, language="vi", close_talk=False)
+        running = asyncio.create_task(session.run_item(lesson.item("good-morning")))
+        await asyncio.sleep(0.3)
+        session._on_phrase({"phrase": "what does it mean"})
+        await asyncio.sleep(0.3)
+        session._on_phrase({"phrase": "good morning"})
+        result = await running
+        texts = [r["text"] for r in fake.asked("say")]
+        assert texts.count("Câu này nghĩa là: chào buổi sáng.") == 2
+        assert result.right and result.tries == 1
+        await lamp.close()
+
+
+async def test_the_coachs_own_line_heard_back_is_not_an_answer():
+    lesson = three_items()
+    async with FakeLamp(grants="all") as fake:
+        lamp = await fake.connect()
+        session = await Session.open(lamp, lesson, listen_s=0.6, tries=1, language="en", close_talk=False)
+        running = asyncio.create_task(session.run_item(lesson.item("a")))
+        # "Say after me: good morning" is cut off, and the lamp hears itself.
+        while not session._listening:
+            await asyncio.sleep(0.01)
+        session._last_cut = True
+        session._on_phrase({"phrase": "good morning"})
+        result = await running
+        assert not result.right
         await lamp.close()

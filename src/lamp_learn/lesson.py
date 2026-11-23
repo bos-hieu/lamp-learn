@@ -21,16 +21,12 @@ limits on registered phrases, so a lesson that loads here is one the lamp takes.
 from __future__ import annotations
 
 import re
-import sys
 import unicodedata
 from dataclasses import dataclass, field
 from importlib import resources
 from pathlib import Path
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:  # pragma: no cover
-    import tomli as tomllib
+import tomllib
 
 KINDS = ("repeat", "word", "talk")
 LESSON_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}")
@@ -62,10 +58,32 @@ class Item:
     # Other ways the recognizer may write the phrase ("good morning" for
     # "good morning everyone"); each one is registered and counts as right.
     accept: list[str] = field(default_factory=list)
+    # Near misses: heard, they get "Close! Say: <phrase>" and another try,
+    # never a point ("i would take it" for "i will take it"). Listened for
+    # only while the lamp's 16 phrases leave room.
+    close: list[str] = field(default_factory=list)
 
     @property
     def phrases(self) -> list[str]:
         return [self.phrase, *self.accept] if self.kind in ("repeat", "word") else []
+
+    @property
+    def near_misses(self) -> list[str]:
+        """`close` and the usual slip of "would" for "will", minus anything
+        that counts as right."""
+        if self.kind not in ("repeat", "word"):
+            return []
+        found = list(self.close)
+        for phrase in self.phrases:
+            words = phrase.split()
+            if "will" in words:
+                found.append(" ".join("would" if w == "will" else w for w in words))
+        right = set(self.phrases)
+        out: list[str] = []
+        for phrase in found:
+            if phrase not in right and phrase not in out:
+                out.append(phrase)
+        return out
 
     def hint_for(self, language: str) -> str:
         return self.hint.get(language, "")
@@ -80,6 +98,9 @@ class Lesson:
     items: list[Item]
     intro: str = ""
     path: Path | None = None
+    # The intro in the learner's language, for a beginner: said in place of
+    # `intro` when the coach speaks that language.
+    intro_hint: dict[str, str] = field(default_factory=dict)
 
     @property
     def phrases(self) -> list[str]:
@@ -147,6 +168,7 @@ def parse(data: dict, path: Path | None = None) -> Lesson:
             prompt=raw.get("prompt", ""),
             hint=dict(raw.get("hint", {})),
             accept=list(raw.get("accept", [])),
+            close=list(raw.get("close", [])),
         )
         if item.id in ids:
             raise LessonError(f"{where}: id used twice")
@@ -154,7 +176,7 @@ def parse(data: dict, path: Path | None = None) -> Lesson:
         if kind in ("repeat", "word"):
             if not item.phrase:
                 raise LessonError(f"{where}: a {kind} item needs `phrase`")
-            for phrase in item.phrases:
+            for phrase in item.phrases + item.close:
                 _check_phrase(where, phrase)
         if kind == "talk" and not item.prompt:
             raise LessonError(f"{where}: a talk item needs `prompt`")
@@ -171,8 +193,11 @@ def parse(data: dict, path: Path | None = None) -> Lesson:
         intro=data.get("intro", ""),
         items=items,
         path=path,
+        intro_hint=dict(data.get("intro_hint", {})),
     )
     _check_said(f"{name} intro", lesson.intro)
+    for language, text in lesson.intro_hint.items():
+        _check_said(f"{name} intro_hint.{language}", text)
     if len(lesson.phrases) > PHRASES_MAX:
         raise LessonError(
             f"{name}: {len(lesson.phrases)} phrases to listen for; the lamp listens for {PHRASES_MAX} at most: split the lesson"

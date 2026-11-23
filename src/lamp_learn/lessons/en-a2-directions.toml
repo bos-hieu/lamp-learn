@@ -3,20 +3,21 @@ title = "Asking for directions"
 target = "en"
 level = "A2"
 intro = "Let's practise asking the way in a new city."
+intro_hint = { vi = "Hôm nay mình tập hỏi đường ở một thành phố mới. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は初めての街で道をたずねる練習をしましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们练习在一个新城市问路。我说一句英语，你跟着我说。", ko = "오늘은 처음 가 본 도시에서 길을 묻는 연습을 해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "excuse-me"
 kind = "repeat"
 phrase = "excuse me where is the station"
 accept = ["where is the station", "where is the train station"]
-hint = { vi = "xin lỗi, nhà ga ở đâu" }
+hint = { vi = "xin lỗi, nhà ga ở đâu", ja = "すみません、駅はどこですか", zh = "请问，车站在哪里", ko = "실례지만, 역이 어디예요" }
 
 [[items]]
 id = "turn-left"
 kind = "repeat"
 phrase = "turn left at the traffic lights"
 accept = ["left at the traffic lights"]
-hint = { vi = "rẽ trái ở chỗ đèn giao thông" }
+hint = { vi = "rẽ trái ở chỗ đèn giao thông", ja = "信号のところで左に曲がってください", zh = "在红绿灯那里左转", ko = "신호등에서 왼쪽으로 도세요" }
 
 [[items]]
 id = "go-straight"
@@ -25,24 +26,27 @@ phrase = "go straight on"
 accept = ["go straight ahead", "straight on"]
 meaning = "keep walking in the same direction"
 example = "Go straight on for two hundred metres."
-hint = { vi = "đi thẳng" }
+hint = { vi = "đi thẳng", ja = "まっすぐ行ってください", zh = "一直往前走", ko = "쭉 가세요" }
 
 [[items]]
 id = "next-to"
 kind = "word"
-phrase = "next to the bank"
+# Not "the bank": the lamp's recognizer wrote "the van".
+phrase = "next to the supermarket"
+accept = ["next to the super market"]
 meaning = "beside, very close to"
-example = "The pharmacy is next to the bank."
-hint = { vi = "bên cạnh ngân hàng" }
+example = "The pharmacy is next to the supermarket."
+hint = { vi = "bên cạnh siêu thị", ja = "スーパーの隣", zh = "在超市旁边", ko = "슈퍼마켓 옆" }
 
 [[items]]
 id = "how-far"
 kind = "repeat"
 phrase = "is it far from here"
 accept = ["far from here"]
-hint = { vi = "có xa đây không" }
+hint = { vi = "có xa đây không", ja = "ここから遠いですか", zh = "离这里远吗", ko = "여기서 멀어요" }
 
 [[items]]
 id = "talk-directions"
 kind = "talk"
 prompt = "Tell me how to get from your home to the nearest shop."
+hint = { vi = "Bây giờ bạn chỉ đường từ nhà bạn tới cửa hàng gần nhất, bằng tiếng Anh. Ví dụ: Go straight on, then turn left.", ja = "では、家から一番近いお店までの道を英語で説明してください。例えば: Go straight on, then turn left.", zh = "现在用英语说说从你家到最近的商店怎么走。例如: Go straight on, then turn left.", ko = "이제 집에서 가장 가까운 가게까지 가는 길을 영어로 알려 주세요. 예를 들면: Go straight on, then turn left." }

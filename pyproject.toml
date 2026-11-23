@@ -7,10 +7,10 @@ name = "lamp-learn"
 version = "0.1.0"
 description = "Language lessons on a lampOS lamp: drills, new words and practice talks, built on the lampos SDK"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-dependencies = ["lampos>=0.2", "tomli>=2; python_version < '3.11'"]
+dependencies = ["lampos>=0.2"]
 
 [project.urls]
 Source = "https://github.com/bos-hieu/lamp-learn"

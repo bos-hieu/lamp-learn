@@ -3,27 +3,28 @@ title = "Last weekend"
 target = "en"
 level = "A2"
 intro = "Let's practise talking about the past: what you did last weekend."
+intro_hint = { vi = "Hôm nay mình tập nói về quá khứ: cuối tuần trước bạn đã làm gì. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は過去のこと、先週末に何をしたかを話す練習をしましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们练习谈论过去：上个周末你做了什么。我说一句英语，你跟着我说。", ko = "오늘은 과거에 대해, 지난 주말에 뭘 했는지 말하는 연습을 해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "went-to"
 kind = "repeat"
 phrase = "i went to the beach"
 accept = ["went to the beach"]
-hint = { vi = "tôi đã đi biển" }
+hint = { vi = "tôi đã đi biển", ja = "私は海に行きました", zh = "我去了海边", ko = "저는 바다에 갔어요" }
 
 [[items]]
 id = "watched"
 kind = "repeat"
 phrase = "we watched a film on saturday"
 accept = ["watched a film", "watched a movie on saturday"]
-hint = { vi = "chúng tôi xem phim vào thứ bảy" }
+hint = { vi = "chúng tôi xem phim vào thứ bảy", ja = "私たちは土曜日に映画を見ました", zh = "我们星期六看了电影", ko = "우리는 토요일에 영화를 봤어요" }
 
 [[items]]
 id = "visited"
 kind = "repeat"
 phrase = "i visited my grandmother"
 accept = ["visited my grandmother", "visited my grandma"]
-hint = { vi = "tôi đã đến thăm bà" }
+hint = { vi = "tôi đã đến thăm bà", ja = "私は祖母に会いに行きました", zh = "我去看了奶奶", ko = "저는 할머니를 뵈러 갔어요" }
 
 [[items]]
 id = "had-a-great-time"
@@ -32,16 +33,17 @@ phrase = "i had a great time"
 accept = ["had a great time"]
 meaning = "you enjoyed something very much"
 example = "I had a great time at the party."
-hint = { vi = "tôi đã rất vui" }
+hint = { vi = "tôi đã rất vui", ja = "とても楽しかったです", zh = "我玩得很开心", ko = "정말 즐거웠어요" }
 
 [[items]]
 id = "what-did-you-do"
 kind = "repeat"
 phrase = "what did you do last weekend"
 accept = ["what did you do"]
-hint = { vi = "cuối tuần trước bạn đã làm gì" }
+hint = { vi = "cuối tuần trước bạn đã làm gì", ja = "先週末は何をしましたか", zh = "你上个周末做了什么", ko = "지난 주말에 뭐 했어요" }
 
 [[items]]
 id = "talk-weekend"
 kind = "talk"
 prompt = "What did you do last weekend? Tell me two things."
+hint = { vi = "Bây giờ bạn kể hai việc bạn đã làm cuối tuần trước. Ví dụ: I watched a film. I visited my friend.", ja = "では、先週末にしたことを二つ話してください。例えば: I watched a film. I visited my friend.", zh = "现在说说你上个周末做的两件事。例如: I watched a film. I visited my friend.", ko = "이제 지난 주말에 한 일 두 가지를 말해 보세요. 예를 들면: I watched a film. I visited my friend." }

@@ -3,20 +3,21 @@ title = "Food and drink"
 target = "en"
 level = "A1"
 intro = "Let's practise ordering food and drink."
+intro_hint = { vi = "Hôm nay mình tập gọi đồ ăn và đồ uống. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は食べ物と飲み物の注文を練習しましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们练习点吃的和喝的。我说一句英语，你跟着我说。", ko = "오늘은 음식과 음료를 주문하는 연습을 해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "hungry"
 kind = "repeat"
 phrase = "i am hungry"
 accept = ["im hungry"]
-hint = { vi = "tôi đói" }
+hint = { vi = "tôi đói", ja = "お腹がすきました", zh = "我饿了", ko = "배고파요" }
 
 [[items]]
 id = "coffee-please"
 kind = "repeat"
 phrase = "a coffee please"
 accept = ["coffee please"]
-hint = { vi = "cho tôi một ly cà phê" }
+hint = { vi = "cho tôi một ly cà phê", ja = "コーヒーを一杯ください", zh = "请给我一杯咖啡", ko = "커피 한 잔 주세요" }
 
 [[items]]
 id = "water"
@@ -25,22 +26,23 @@ phrase = "a glass of water"
 accept = ["glass of water"]
 meaning = "water in a glass, to drink"
 example = "Can I have a glass of water, please?"
-hint = { vi = "một ly nước" }
+hint = { vi = "một ly nước", ja = "お水一杯", zh = "一杯水", ko = "물 한 잔" }
 
 [[items]]
 id = "like-rice"
 kind = "repeat"
 phrase = "i like rice and chicken"
 accept = ["rice and chicken"]
-hint = { vi = "tôi thích cơm và thịt gà" }
+hint = { vi = "tôi thích cơm và thịt gà", ja = "私はご飯と鶏肉が好きです", zh = "我喜欢米饭和鸡肉", ko = "저는 밥과 닭고기를 좋아해요" }
 
 [[items]]
 id = "how-much"
 kind = "repeat"
 phrase = "how much is it"
-hint = { vi = "cái này bao nhiêu tiền" }
+hint = { vi = "cái này bao nhiêu tiền", ja = "これはいくらですか", zh = "这个多少钱", ko = "이거 얼마예요" }
 
 [[items]]
 id = "talk-food"
 kind = "talk"
 prompt = "What is your favourite food? When do you eat it?"
+hint = { vi = "Bây giờ bạn kể món ăn bạn thích nhất, và bạn hay ăn nó khi nào. Ví dụ: I like pho. I eat it for breakfast.", ja = "では、一番好きな食べ物と、それをいつよく食べるかを話してください。例えば: I like pho. I eat it for breakfast.", zh = "现在说说你最喜欢的食物，还有你一般什么时候吃。例如: I like pho. I eat it for breakfast.", ko = "이제 제일 좋아하는 음식과 그걸 주로 언제 먹는지 말해 보세요. 예를 들면: I like pho. I eat it for breakfast." }

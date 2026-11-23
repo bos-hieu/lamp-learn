@@ -28,6 +28,7 @@ hint = { vi = "tôi không chắc lắm về điều đó" }
 id = "on-the-other-hand"
 kind = "word"
 phrase = "on the other hand"
+accept = ["the other hand", "other hand"]
 meaning = "used to give a different side of an idea"
 example = "The city is exciting. On the other hand, it is very expensive."
 hint = { vi = "mặt khác" }

@@ -3,36 +3,39 @@ title = "My daily routine"
 target = "en"
 level = "A2"
 intro = "Today we talk about your day."
+intro_hint = { vi = "Hôm nay mình nói về một ngày của bạn. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日はあなたの一日について話しましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们聊聊你的一天。我说一句英语，你跟着我说。", ko = "오늘은 하루 일과에 대해 이야기해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "wake-up"
 kind = "repeat"
-phrase = "i wake up at seven"
-accept = ["wake up at seven", "i wake up at 7"]
-hint = { vi = "tôi thức dậy lúc bảy giờ" }
+# Not "at seven": the lamp's recognizer writes "I wake up at 7:00".
+phrase = "i wake up early"
+accept = ["wake up early"]
+hint = { vi = "tôi thức dậy sớm", ja = "私は早起きします", zh = "我起得很早", ko = "저는 일찍 일어나요" }
 
 [[items]]
 id = "breakfast"
 kind = "repeat"
 phrase = "i have breakfast with my family"
 accept = ["breakfast with my family"]
-hint = { vi = "tôi ăn sáng cùng gia đình" }
+hint = { vi = "tôi ăn sáng cùng gia đình", ja = "私は家族と朝ごはんを食べます", zh = "我和家人一起吃早饭", ko = "저는 가족과 함께 아침을 먹어요" }
 
 [[items]]
 id = "go-to-work"
 kind = "repeat"
 phrase = "then i go to work"
 accept = ["i go to work"]
-hint = { vi = "sau đó tôi đi làm" }
+hint = { vi = "sau đó tôi đi làm", ja = "それから仕事に行きます", zh = "然后我去上班", ko = "그다음에 일하러 가요" }
 
 [[items]]
 id = "evening"
 kind = "repeat"
 phrase = "in the evening i read a book"
 accept = ["i read a book"]
-hint = { vi = "buổi tối tôi đọc sách" }
+hint = { vi = "buổi tối tôi đọc sách", ja = "夜は本を読みます", zh = "晚上我看书", ko = "저녁에는 책을 읽어요" }
 
 [[items]]
 id = "talk-day"
 kind = "talk"
 prompt = "Tell me about your day yesterday. What did you do in the morning?"
+hint = { vi = "Bây giờ bạn kể hôm qua bạn đã làm gì, nhất là buổi sáng. Ví dụ: Yesterday I went to work.", ja = "では、昨日何をしたか、特に朝のことを話してください。例えば: Yesterday I went to work.", zh = "现在说说你昨天做了什么，特别是早上。例如: Yesterday I went to work.", ko = "이제 어제 뭘 했는지, 특히 아침에 뭘 했는지 말해 보세요. 예를 들면: Yesterday I went to work." }

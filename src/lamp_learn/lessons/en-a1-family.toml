@@ -3,12 +3,13 @@ title = "My family"
 target = "en"
 level = "A1"
 intro = "Let's talk about your family."
+intro_hint = { vi = "Hôm nay mình học cách nói về gia đình. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は家族について話す練習をしましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们学习怎么谈论家人。我说一句英语，你跟着我说。", ko = "오늘은 가족에 대해 말하는 법을 배워요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "this-is-mother"
 kind = "repeat"
 phrase = "this is my mother"
-hint = { vi = "đây là mẹ tôi" }
+hint = { vi = "đây là mẹ tôi", ja = "こちらは私の母です", zh = "这是我妈妈", ko = "이분은 제 엄마예요" }
 
 [[items]]
 id = "brother"
@@ -17,21 +18,21 @@ phrase = "my little brother"
 accept = ["little brother"]
 meaning = "a brother who is younger than you"
 example = "My little brother is eight years old."
-hint = { vi = "em trai tôi" }
+hint = { vi = "em trai tôi", ja = "私の弟", zh = "我弟弟", ko = "제 남동생" }
 
 [[items]]
 id = "how-many"
 kind = "repeat"
 phrase = "i have two sisters"
 accept = ["i have 2 sisters", "two sisters"]
-hint = { vi = "tôi có hai chị em gái" }
+hint = { vi = "tôi có hai chị em gái", ja = "私には姉妹が二人います", zh = "我有两个姐妹", ko = "저는 자매가 두 명 있어요" }
 
 [[items]]
 id = "father-works"
 kind = "repeat"
 phrase = "my father is a teacher"
 accept = ["father is a teacher"]
-hint = { vi = "bố tôi là giáo viên" }
+hint = { vi = "bố tôi là giáo viên", ja = "私の父は先生です", zh = "我爸爸是老师", ko = "제 아빠는 선생님이에요" }
 
 [[items]]
 id = "grandparents"
@@ -40,9 +41,10 @@ phrase = "my grandparents"
 accept = ["grandparents"]
 meaning = "the parents of your mother or father"
 example = "I visit my grandparents every Sunday."
-hint = { vi = "ông bà của tôi" }
+hint = { vi = "ông bà của tôi", ja = "私の祖父母", zh = "我的祖父母", ko = "제 할아버지와 할머니" }
 
 [[items]]
 id = "talk-family"
 kind = "talk"
 prompt = "Tell me about your family. How many people are in your family?"
+hint = { vi = "Bây giờ bạn kể về gia đình mình nhé: nhà bạn có mấy người? Ví dụ: There are four people in my family.", ja = "では、あなたの家族について話してください。何人家族ですか? 例えば: There are four people in my family.", zh = "现在说说你的家人吧：你家有几口人？例如: There are four people in my family.", ko = "이제 가족에 대해 말해 보세요. 가족이 몇 명이에요? 예를 들면: There are four people in my family." }

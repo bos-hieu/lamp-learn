@@ -3,20 +3,21 @@ title = "Shopping for clothes"
 target = "en"
 level = "A2"
 intro = "Let's practise buying clothes in a shop."
+intro_hint = { vi = "Hôm nay mình tập mua quần áo ở cửa hàng. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日はお店で服を買う練習をしましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们练习在商店买衣服。我说一句英语，你跟着我说。", ko = "오늘은 가게에서 옷을 사는 연습을 해요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "try-on"
 kind = "repeat"
 phrase = "can i try this on"
 accept = ["try this on"]
-hint = { vi = "tôi mặc thử được không" }
+hint = { vi = "tôi mặc thử được không", ja = "試着してもいいですか", zh = "我可以试一下吗", ko = "입어 봐도 돼요" }
 
 [[items]]
 id = "bigger-size"
 kind = "repeat"
 phrase = "do you have a bigger size"
 accept = ["a bigger size", "a larger size"]
-hint = { vi = "bạn có cỡ lớn hơn không" }
+hint = { vi = "bạn có cỡ lớn hơn không", ja = "もっと大きいサイズはありますか", zh = "有大一号的吗", ko = "더 큰 사이즈 있어요" }
 
 [[items]]
 id = "too-expensive"
@@ -24,23 +25,24 @@ kind = "word"
 phrase = "too expensive"
 meaning = "costs more than you want to pay"
 example = "These shoes are nice, but they are too expensive."
-hint = { vi = "đắt quá" }
+hint = { vi = "đắt quá", ja = "高すぎます", zh = "太贵了", ko = "너무 비싸요" }
 
 [[items]]
 id = "pay-by-card"
 kind = "repeat"
 phrase = "can i pay by card"
 accept = ["pay by card"]
-hint = { vi = "tôi trả bằng thẻ được không" }
+hint = { vi = "tôi trả bằng thẻ được không", ja = "カードで払えますか", zh = "可以刷卡吗", ko = "카드로 계산해도 돼요" }
 
 [[items]]
 id = "ill-take-it"
 kind = "repeat"
 phrase = "i will take it"
 accept = ["ill take it", "i will take this"]
-hint = { vi = "tôi lấy cái này" }
+hint = { vi = "tôi lấy cái này", ja = "これにします", zh = "我要这个", ko = "이걸로 할게요" }
 
 [[items]]
 id = "talk-clothes"
 kind = "talk"
 prompt = "What clothes do you like to wear at the weekend? What colour do you like?"
+hint = { vi = "Bây giờ bạn kể cuối tuần bạn thích mặc gì, và bạn thích màu gì. Ví dụ: I like blue jeans.", ja = "では、週末にどんな服を着るのが好きか、何色が好きかを話してください。例えば: I like blue jeans.", zh = "现在说说你周末喜欢穿什么衣服，喜欢什么颜色。例如: I like blue jeans.", ko = "이제 주말에 어떤 옷을 즐겨 입는지, 무슨 색을 좋아하는지 말해 보세요. 예를 들면: I like blue jeans." }

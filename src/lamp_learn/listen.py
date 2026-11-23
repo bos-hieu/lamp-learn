@@ -13,9 +13,9 @@ Leave it running. It registers a few phrases with the lamp and waits:
 - "list English lessons" (or "list beginner / intermediate / advanced
   lessons"): the lamp says the lessons at that level, then listens for one
   by name ("family lesson").
-- With `--levels`, a lesson by name too: "start family lesson" (as many as
-  fit in the lamp's 16 phrases, in level order).
-- "English free talk": a conversation with the lamp's own model (free talk).
+- With `--levels`, a lesson by topic too: "English lesson about family" (as
+  many as fit in the lamp's 16 phrases, in level order).
+- "English conversation": a conversation with the lamp's own model (free talk).
 
 It hears these through the lamp's own phrase matching, as a lesson's answers
 are: nothing else you say reaches the computer. While a lesson runs, the
@@ -27,8 +27,10 @@ it), it connects again, waiting longer each time, up to a minute.
 from __future__ import annotations
 
 import asyncio
+import time
 from typing import Callable
 
+from . import hearing
 from . import lesson as lessons
 from .coach import Session
 from .progress import Progress
@@ -45,7 +47,8 @@ LEVEL_LESSON = {
 # (The lamp listens for 16 phrases at most, so each has one form.)
 NEXT_LESSON = ("next english lesson",)
 REPEAT_LESSON = ("repeat english lesson",)
-FREE_TALK = ("english free talk",)
+# Not "english free talk": the lamp missed it about half the time.
+FREE_TALK = ("english conversation",)
 # The lamp says a level's lessons, then listens for one of them by name.
 # Both "lessons" and "lesson": the recognizer writes either, and a missed
 # list phrase would leave only "english lesson", which starts a lesson.
@@ -77,7 +80,96 @@ SAME_LINE_S = 0.8
 # begins after it.
 START_PAUSE_S = 6.0
 
+class PhraseBudget:
+    """The lamp takes 6 changes of a computer's phrases a minute (sending the
+    same set again is free). Past that a change is refused, and the lamp goes
+    on listening for the old phrases, so a wake phrase is never heard. This
+    waits instead, before each change."""
+
+    MOST = 6
+    WINDOW_S = 60.0
+
+    def __init__(self, log: Callable[[str], None] = lambda line: None):
+        self.log = log
+        self.changes: list[float] = []
+        self.current: frozenset[str] | None = None
+
+    async def spend(self, phrases) -> None:
+        wanted = frozenset(p.lower() for p in phrases)
+        if wanted == self.current:
+            return
+        now = time.monotonic()
+        self.changes = [t for t in self.changes if now - t < self.WINDOW_S]
+        if len(self.changes) >= self.MOST - 1:  # keep one in hand
+            wait = self.WINDOW_S - (now - self.changes[0]) + 0.5
+            self.log(f"phrases: waiting {wait:.0f} s for the lamp's limit of {self.MOST} changes a minute")
+            await asyncio.sleep(wait)
+        self.changes.append(time.monotonic())
+        self.current = wanted
+
+
 LEVEL_ORDER = {level: n for n, level in enumerate(("A1", "A2", "B1", "B2", "C1", "C2"))}
+
+
+# A lesson cut off by a dropped connection goes on from where it stopped, at
+# most this many times.
+MOST_RESUMES = 2
+
+
+def _dropped(error: BaseException) -> bool:
+    return isinstance(error, (ConnectionError, OSError)) or getattr(error, "code", None) == "closed"
+
+
+class _Held:
+    """A connection already open, used as one opened here (not closed here)."""
+
+    def __init__(self, lamp):
+        self.lamp = lamp
+
+    async def __aenter__(self):
+        return self.lamp
+
+    async def __aexit__(self, *exc):
+        return False
+
+
+async def run_lesson(connect, found, due: bool, *, progress, language, listen_s, log, budget=None, lamp=None) -> "object":
+    """Run one lesson on its own connection. If the connection drops part way,
+    connect again and go on with the items not done, saying so; the items
+    done are kept. Returns the whole lesson's result."""
+    from .coach import LessonResult
+
+    done: list = []
+    remaining: list[str] | None = None
+    for attempt in range(MOST_RESUMES + 1):
+        session = None
+        try:
+            opened = _Held(lamp) if lamp is not None and attempt == 0 else await _connect(connect)
+            async with opened as lamp:
+                if budget:
+                    await budget.spend(Session.phrases_for(found))
+                session = await Session.open(lamp, found, progress=progress, language=language, listen_s=listen_s, log=log)
+                if attempt:
+                    await session.say(session._word("resumed"))
+                result = await session.run(remaining, due_only=due and remaining is None, intro=attempt == 0)
+                whole = LessonResult(found.id, done + result.items, result.stopped)
+                log(f"lesson done: {whole.right} of {whole.scored} right{' (stopped)' if whole.stopped else ''}")
+                return whole
+        except Exception as error:
+            if not _dropped(error) or attempt == MOST_RESUMES:
+                raise
+            planned = getattr(session, "planned", None)
+            got = getattr(session, "result", None)
+            if planned is None:
+                raise  # it never began: the usual retry in serve
+            done += got.items if got else []
+            ids = {r.item for r in done}
+            remaining = [i.id for i in planned if i.id not in ids] if remaining is None else [i for i in remaining if i not in ids]
+            if not remaining:
+                return LessonResult(found.id, done)
+            log(f"lamp: the connection dropped in the lesson ({error}); going on with {len(remaining)} item(s)")
+            await asyncio.sleep(2)
+    return LessonResult(found.id, done)
 
 
 def pick(progress: Progress, levels: tuple[str, ...] | None = None) -> tuple[lessons.Lesson, bool] | None:
@@ -116,6 +208,12 @@ def spoken_name(lesson: lessons.Lesson) -> str:
     return SPOKEN.get(tail, tail.replace("-", " "))
 
 
+def about(lesson: lessons.Lesson) -> str:
+    """The phrase that starts a lesson by its topic: "lesson about family"
+    (inside "start an English lesson about family" too)."""
+    return f"lesson about {spoken_name(lesson)}"
+
+
 def menu(progress: Progress, phrase: str, levels: tuple[str, ...] | None = None) -> tuple[str, dict[str, lessons.Lesson]]:
     """What the lamp says to list a level's lessons, and the phrase that
     chooses each. The plain "list English lessons" lists the learner's level:
@@ -144,6 +242,8 @@ def menu(progress: Progress, phrase: str, levels: tuple[str, ...] | None = None)
 
 def _sentences(line: str) -> list[str]:
     """The list's heading, each name, then each sentence: what `menu` joined."""
+    if not line.strip():
+        return []
     head, _, rest = line.partition(": ")
     if not rest:
         return [line]
@@ -155,7 +255,14 @@ def _sentences(line: str) -> list[str]:
     return out
 
 
-async def choose_from_menu(lamp, line: str, choices: dict[str, lessons.Lesson], wait_s: float | None = None) -> lessons.Lesson | None:
+async def choose_from_menu(
+    lamp,
+    line: str,
+    choices: dict[str, lessons.Lesson],
+    wait_s: float | None = None,
+    log: Callable[[str], None] = lambda line: None,
+    budget: PhraseBudget | None = None,
+) -> lessons.Lesson | None:
     """Say the list, then listen for a lesson's name for `CHOOSE_S`."""
     loop = asyncio.get_running_loop()
     picked: asyncio.Future = loop.create_future()
@@ -165,12 +272,18 @@ async def choose_from_menu(lamp, line: str, choices: dict[str, lessons.Lesson], 
         if phrase in choices and not picked.done():
             picked.set_result(choices[phrase])
 
-    await lamp.on("phrase.heard", on_phrase, phrases=list(choices))
+    if budget:
+        await budget.spend(choices)
+    await hearing.listen_for(lamp, on_phrase, list(choices))
     # One sentence at a time, so the names come with a pause between them.
     for part in _sentences(line):
         if picked.done():
             break
+        began = loop.time()
         await lamp.say(part, wait=True)
+        if loop.time() - began > 8:
+            log(f"list: slow to say ({loop.time() - began:.0f} s): {part}")
+    log("list: said; waiting for a lesson's name")
     try:
         return await asyncio.wait_for(picked, wait_s if wait_s is not None else CHOOSE_S)
     except asyncio.TimeoutError:
@@ -181,8 +294,9 @@ def choose(phrase: str, progress: Progress, levels: tuple[str, ...] | None = Non
     """What a heard phrase asks for: (lesson, due items only, a line to say
     first or ""). No lesson means nothing fits."""
     if phrase in REPEAT_LESSON:
-        last = progress.last_lesson()
-        found = lessons.builtin().get(last) if last else None
+        every = lessons.builtin()
+        last = progress.last_lesson(None if levels is None else {i for i, l in every.items() if l.level in levels})
+        found = every.get(last) if last else None
         if found:
             return found, False, ""
         phrase, note = START_LESSON[0], "There is no lesson to repeat yet, so here is your first."
@@ -193,7 +307,12 @@ def choose(phrase: str, progress: Progress, levels: tuple[str, ...] | None = Non
         phrase, note = START_LESSON[0], "You have started every lesson, so here are your reviews."
     else:
         note = ""
-    chosen = pick(progress, LEVEL_LESSON.get(phrase, levels))
+    asked = LEVEL_LESSON.get(phrase)
+    if asked and levels is not None:
+        # A level asked for by voice, within the levels set: "beginner" with
+        # A2 B1 set is A2. With none of the group set, the group as asked.
+        asked = tuple(l for l in asked if l in levels) or asked
+    chosen = pick(progress, asked or levels)
     if chosen is None:
         return None, False, note
     return chosen[0], chosen[1], note
@@ -213,25 +332,44 @@ async def _connect(connect, tries: int = 6):
 
 def wake_phrases(levels: tuple[str, ...] | None = None) -> tuple[list[str], dict[str, lessons.Lesson]]:
     """The phrases to wait for, and the lessons started by name. With
-    `levels`, the phrases for other levels make room for lessons said by
-    name ("start family lesson"), up to the lamp's 16."""
+    `levels`, every lesson at those levels can be asked for by topic
+    ("English lesson about family"), up to the lamp's 16: the topics come
+    before the spare forms (a level phrase that says no more than "English
+    lesson", the singular "list ... lesson"), which fill what is left."""
     if not levels:
         return list(WAKE), {}
-    keep = [
-        p
-        for p in WAKE
-        if not ((p in LEVEL_LESSON and not set(LEVEL_LESSON[p]) & set(levels)) or (p in LIST_LESSONS and LIST_LESSONS[p] and not set(LIST_LESSONS[p]) & set(levels)))
-    ]
+    wanted = set(levels)
+
+    def fits(group) -> bool:
+        return bool(set(group) & wanted)
+
+    # A level phrase is spare when the levels are all inside that group:
+    # "English lesson" already asks for the same lessons.
+    spare_level = {p for p, g in LEVEL_LESSON.items() if fits(g) and wanted <= set(g)}
+    core, spare = [], []
+    for p in WAKE:
+        if p in LEVEL_LESSON:
+            if not fits(LEVEL_LESSON[p]):
+                continue
+            (spare if p in spare_level else core).append(p)
+        elif p in LIST_LESSONS:
+            group = LIST_LESSONS[p]
+            if group is not None and not fits(group):
+                continue
+            (spare if p.endswith(" lesson") else core).append(p)
+        else:
+            core.append(p)
     found = sorted((l for l in lessons.builtin().values() if l.level in levels), key=lambda l: (LEVEL_ORDER.get(l.level, 9), l.id))
     direct = {}
     for l in found:
-        if len(keep) + len(direct) >= 16:
+        if len(core) + len(direct) >= 16:
             break
-        direct[f"{spoken_name(l)} lesson"] = l
-    return keep + list(direct), direct
+        direct[about(l)] = l
+    room = 16 - len(core) - len(direct)
+    return core + list(direct) + spare[: max(0, room)], direct
 
 
-async def wait_for_wake(lamp, phrases: list[str] | None = None) -> str:
+async def wait_for_wake(lamp, phrases: list[str] | None = None, budget: PhraseBudget | None = None) -> str:
     """Register the wake phrases and return the one heard. A line can hold
     two ("start my advanced English lesson" holds "English lesson" too):
     after the first, a moment more is given, and the more specific one wins."""
@@ -247,7 +385,9 @@ async def wait_for_wake(lamp, phrases: list[str] | None = None) -> str:
             if not first.done():
                 first.set_result(phrase)
 
-    await lamp.on("phrase.heard", on_phrase, phrases=wanted)
+    if budget:
+        await budget.spend(wanted)
+    await hearing.listen_for(lamp, on_phrase, wanted)
     # A connection that drops (the lamp restarts, a relay or the network goes)
     # ends the wait, so the caller connects again instead of waiting forever.
     closed = asyncio.ensure_future(lamp.wait_closed())
@@ -264,6 +404,18 @@ async def wait_for_wake(lamp, phrases: list[str] | None = None) -> str:
     return got[0]
 
 
+def free_talk_level(progress: Progress, levels: tuple[str, ...] | None) -> str:
+    """The learner's level for free talk: their last lesson's, else the
+    highest level listened for, else B1. A beginner isn't talked to at B1."""
+    last = progress.last_lesson()
+    builtin = lessons.builtin()
+    if last in builtin and (not levels or builtin[last].level in levels):
+        return builtin[last].level
+    if levels:
+        return max(levels, key=lambda l: LEVEL_ORDER.get(l, 0))
+    return "B1"
+
+
 async def serve(
     connect: Callable,
     *,
@@ -271,7 +423,7 @@ async def serve(
     levels: tuple[str, ...] | None = None,
     language: str | None = None,
     listen_s: float = 15,
-    talk_level: str = "B1",
+    talk_level: str | None = None,
     log: Callable[[str], None] = print,
     once: bool = False,
     show: Callable[[str, str], None] | None = None,
@@ -281,6 +433,7 @@ async def serve(
     With `once`, returns after the first lesson or talk. `show(title, text)`
     puts the lesson list on this computer's screen too (a notification)."""
     progress = progress or Progress()
+    budget = PhraseBudget(log)
     backoff = 1.0
     installed = False
     while True:
@@ -294,19 +447,16 @@ async def serve(
 
                     await install(lamp, log)
                     installed = True
-                log('listening: say "start my English lesson", "next English lesson", "repeat English lesson", "list English lessons", a beginner, intermediate or advanced English lesson, or "English free talk" to the lamp')
+                log('listening: say "start my English lesson", "next English lesson", "repeat English lesson", "list English lessons", a beginner, intermediate or advanced English lesson, or "English conversation" to the lamp')
                 phrases, direct = wake_phrases(levels)
-                phrase = await wait_for_wake(lamp, phrases)
+                phrase = await wait_for_wake(lamp, phrases, budget)
             log(f"heard: {phrase}")
             # Let the lamp's own short "starting" line be said first.
             await asyncio.sleep(START_PAUSE_S)
             if phrase in direct:
                 found = direct[phrase]
-                log(f"lesson: {found.id} (said by name)")
-                async with await _connect(connect) as lamp:
-                    session = await Session.open(lamp, found, progress=progress, language=language, listen_s=listen_s, log=log)
-                    result = await session.run()
-                    log(f"lesson done: {result.right} of {result.scored} right{' (stopped)' if result.stopped else ''}")
+                log(f"lesson: {found.id} (asked by topic)")
+                await run_lesson(connect, found, False, progress=progress, language=language, listen_s=listen_s, log=log, budget=budget)
                 if once:
                     return
                 continue
@@ -316,7 +466,12 @@ async def serve(
                 if show:
                     show("English lessons", line)
                 async with await _connect(connect) as lamp:
-                    found = await choose_from_menu(lamp, line, choices)
+                    from .coach import close_conversation
+
+                    # The voice may answer "list English lessons" itself; let
+                    # it finish and close its window, so the choice is heard.
+                    await close_conversation(lamp, log)
+                    found = await choose_from_menu(lamp, line, choices, log=log, budget=budget)
                     if found is None:
                         await lamp.say("I didn't catch a lesson. Say list English lessons to hear them again.", wait=True)
                 if found is None:
@@ -325,10 +480,7 @@ async def serve(
                         return
                     continue
                 log(f"lesson: {found.id} (chosen)")
-                async with await _connect(connect) as lamp:
-                    session = await Session.open(lamp, found, progress=progress, language=language, listen_s=listen_s, log=log)
-                    result = await session.run()
-                    log(f"lesson done: {result.right} of {result.scored} right{' (stopped)' if result.stopped else ''}")
+                await run_lesson(connect, found, False, progress=progress, language=language, listen_s=listen_s, log=log, budget=budget)
                 if once:
                     return
                 continue
@@ -336,7 +488,7 @@ async def serve(
                 if phrase in FREE_TALK:
                     from .freetalk import free_talk
 
-                    await free_talk(lamp, "free", talk_level, log=log)
+                    await free_talk(lamp, "free", talk_level or free_talk_level(progress, levels), log=log)
                 else:
                     found, due, note = choose(phrase, progress, levels)
                     if note:
@@ -345,9 +497,7 @@ async def serve(
                         await lamp.say("I have no lessons for that level.", wait=True)
                     else:
                         log(f"lesson: {found.id} ({'reviews due' if due else 'new'})")
-                        session = await Session.open(lamp, found, progress=progress, language=language, listen_s=listen_s, log=log)
-                        result = await session.run(due_only=due)
-                        log(f"lesson done: {result.right} of {result.scored} right{' (stopped)' if result.stopped else ''}")
+                        await run_lesson(connect, found, due, progress=progress, language=language, listen_s=listen_s, log=log, budget=budget, lamp=lamp)
             if once:
                 return
         except asyncio.CancelledError:

@@ -3,15 +3,17 @@ title = "Things on my desk"
 target = "en"
 level = "A1"
 intro = "Let's learn the names of things on your desk."
+intro_hint = { vi = "Hôm nay mình học tên các đồ vật trên bàn làm việc của bạn. Mình nói một câu tiếng Anh, bạn nói lại theo mình nhé.", ja = "今日は机の上にある物の名前を覚えましょう。私が英語で言うので、続けて言ってみてください。", zh = "今天我们学习你书桌上东西的名称。我说一句英语，你跟着我说。", ko = "오늘은 책상 위에 있는 물건 이름을 배워요. 제가 영어로 한 문장 말하면 따라 말해 보세요." }
 
 [[items]]
 id = "notebook"
 kind = "word"
-phrase = "a notebook"
-accept = ["notebook"]
-meaning = "a book of empty pages you write in"
+# Not "a notebook" alone: too short, the lamp's recognizer missed it.
+phrase = "i need a notebook"
+accept = ["need a notebook", "a notebook", "notebook", "a note book"]
+meaning = "you want a book of empty pages to write in"
 example = "I write my homework in a notebook."
-hint = { vi = "quyển vở" }
+hint = { vi = "tôi cần một quyển vở", ja = "ノートが必要です", zh = "我需要一个笔记本", ko = "공책이 필요해요" }
 
 [[items]]
 id = "pencil"
@@ -20,7 +22,7 @@ phrase = "a pencil please"
 accept = ["pencil please"]
 meaning = "a thin stick you write or draw with"
 example = "Can I borrow a pencil, please?"
-hint = { vi = "cho tôi một cây bút chì" }
+hint = { vi = "cho tôi một cây bút chì", ja = "鉛筆を一本ください", zh = "请给我一支铅笔", ko = "연필 하나 주세요" }
 
 [[items]]
 id = "keyboard"
@@ -29,15 +31,18 @@ phrase = "the keyboard"
 accept = ["keyboard"]
 meaning = "the keys you type on"
 example = "My keyboard is next to the lamp."
-hint = { vi = "bàn phím" }
+hint = { vi = "bàn phím", ja = "キーボード", zh = "键盘", ko = "키보드" }
 
 [[items]]
-id = "turn-on-light"
+id = "phone-on-desk"
 kind = "repeat"
-phrase = "turn on the light"
-hint = { vi = "bật đèn lên" }
+# Not "turn on the light": the lamp obeys that itself, mid-lesson.
+phrase = "my phone is on the desk"
+accept = ["phone is on the desk"]
+hint = { vi = "điện thoại của tôi ở trên bàn", ja = "私の携帯電話は机の上にあります", zh = "我的手机在桌子上", ko = "제 휴대폰은 책상 위에 있어요" }
 
 [[items]]
 id = "talk-desk"
 kind = "talk"
 prompt = "Look at your desk. Tell me three things you can see, in English."
+hint = { vi = "Bây giờ bạn nhìn lên bàn và kể ba thứ bạn thấy, bằng tiếng Anh. Ví dụ: I can see a cup. Nói ngắn thôi cũng được.", ja = "では、机を見て、見える物を三つ英語で言ってください。例えば: I can see a cup. 短くても大丈夫ですよ。", zh = "现在看看你的桌子，用英语说出你看到的三样东西。例如: I can see a cup. 说得简短也没关系。", ko = "이제 책상을 보고 보이는 물건 세 가지를 영어로 말해 보세요. 예를 들면: I can see a cup. 짧게 말해도 괜찮아요." }

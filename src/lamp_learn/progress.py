@@ -39,9 +39,32 @@ class Progress:
     def __init__(self, path: str | Path | None = None, learner: str = "default"):
         self.path = Path(path) if path else default_path()
         self.learner = learner
-        self._data: dict = {}
-        if self.path.exists():
-            self._data = json.loads(self.path.read_text(encoding="utf-8"))
+        self._data: dict = self._load()
+
+    def _load(self) -> dict:
+        """The saved progress. A file that isn't progress (empty, cut off,
+        edited by hand) is kept beside it as `.bad` and the score starts
+        again, rather than stopping every lesson; cards that can't be read
+        are dropped."""
+        if not self.path.exists():
+            return {}
+        try:
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+            if not isinstance(data, dict):
+                raise ValueError("not an object")
+        except (ValueError, UnicodeDecodeError):
+            self.path.replace(self.path.with_name(self.path.name + ".bad"))
+            return {}
+        fields = set(Card.__dataclass_fields__)
+        clean = {}
+        for learner, cards in data.items():
+            if isinstance(cards, dict):
+                clean[learner] = {
+                    key: card for key, card in cards.items()
+                    if isinstance(key, str) and "/" in key and isinstance(card, dict) and set(card) <= fields
+                    and all(isinstance(v, (int, float)) for v in card.values())
+                }
+        return clean
 
     def _cards(self) -> dict:
         return self._data.setdefault(self.learner, {})
@@ -63,9 +86,12 @@ class Progress:
         self.save()
         return card
 
-    def last_lesson(self) -> str | None:
-        """The lesson practised most recently, or None before the first."""
+    def last_lesson(self, lesson_ids: set[str] | None = None) -> str | None:
+        """The lesson practised most recently (of `lesson_ids`, if given), or
+        None before the first."""
         cards = self._cards()
+        if lesson_ids is not None:
+            cards = {k: v for k, v in cards.items() if k.split("/", 1)[0] in lesson_ids}
         if not cards:
             return None
         key = max(cards, key=lambda k: cards[k].get("seen", 0))
