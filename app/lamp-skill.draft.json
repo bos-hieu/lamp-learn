@@ -1,0 +1,145 @@
+{
+  "format": 2,
+  "kind": "app",
+  "name": "lamp-learn",
+  "title": "English lessons",
+  "version": "0.3.9",
+  "min_build": null,
+  "runtime": {
+    "name": "python3",
+    "entry": "lamp_learn.app"
+  },
+  "grants": [
+    "speak",
+    "hear",
+    "light",
+    "body"
+  ],
+  "net": false,
+  "logs": true,
+  "triggers": [
+    "start my english lesson",
+    "next english lesson",
+    "repeat english lesson",
+    "list english lessons",
+    "stop english lesson",
+    "english conversation"
+  ],
+  "settings": [
+    {
+      "key": "level_from",
+      "type": "choice",
+      "label": "Lowest level",
+      "options": [
+        {
+          "value": "a1",
+          "label": "A1"
+        },
+        {
+          "value": "a2",
+          "label": "A2"
+        },
+        {
+          "value": "b1",
+          "label": "B1"
+        },
+        {
+          "value": "b2",
+          "label": "B2"
+        },
+        {
+          "value": "c1",
+          "label": "C1"
+        },
+        {
+          "value": "c2",
+          "label": "C2"
+        }
+      ],
+      "default": "a1"
+    },
+    {
+      "key": "level_to",
+      "type": "choice",
+      "label": "Highest level",
+      "options": [
+        {
+          "value": "a1",
+          "label": "A1"
+        },
+        {
+          "value": "a2",
+          "label": "A2"
+        },
+        {
+          "value": "b1",
+          "label": "B1"
+        },
+        {
+          "value": "b2",
+          "label": "B2"
+        },
+        {
+          "value": "c1",
+          "label": "C1"
+        },
+        {
+          "value": "c2",
+          "label": "C2"
+        }
+      ],
+      "default": "a2"
+    },
+    {
+      "key": "hint_language",
+      "type": "choice",
+      "label": "Language for meanings and hints",
+      "options": [
+        {
+          "value": "en",
+          "label": "English"
+        },
+        {
+          "value": "vi",
+          "label": "Tiếng Việt"
+        },
+        {
+          "value": "ja",
+          "label": "日本語"
+        },
+        {
+          "value": "zh",
+          "label": "中文"
+        },
+        {
+          "value": "ko",
+          "label": "한국어"
+        }
+      ],
+      "default": "en"
+    },
+    {
+      "key": "answer_seconds",
+      "type": "number",
+      "label": "Seconds to answer",
+      "min": 5,
+      "max": 30,
+      "unit": "s",
+      "default": 15
+    },
+    {
+      "key": "learner",
+      "type": "text",
+      "label": "Learner name",
+      "max": 32,
+      "default": "default"
+    }
+  ],
+  "skills": [
+    "english-tutor"
+  ],
+  "assets": [
+    "assets/learn-right.wav",
+    "assets/learn-miss.wav"
+  ]
+}
